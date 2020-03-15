@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="theme-next gemini" lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    }
+  };
+</script>
+
+  <meta name="description" content="本文是《浅入浅出k8s实战-k8s初体验篇的第三篇 》  此文为提取大纲，按照互动教程进行分享教学用。另补充一些知识点，和关联操作。 原文：  中：https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/deploy-intro/ 英：https://kubernetes.io/docs/tutorials/kubernetes-bas">
+<meta name="keywords" content="k8s,kubernetes,浅入浅出k8s实战">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K8S互动教程2-部署一个应用">
+<meta property="og:url" content="https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-2.html">
+<meta property="og:site_name" content="Khan">
+<meta property="og:description" content="本文是《浅入浅出k8s实战-k8s初体验篇的第三篇 》  此文为提取大纲，按照互动教程进行分享教学用。另补充一些知识点，和关联操作。 原文：  中：https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/deploy-intro/ 英：https://kubernetes.io/docs/tutorials/kubernetes-bas">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/svg/328984/1558525566332-b2e4462e-beaa-4b60-b41a-d5397aa78548.svg#align=left&display=inline&height=385&originHeight=385&originWidth=476&size=0&status=done&width=476">
+<meta property="og:updated_time" content="2019-05-23T07:29:07.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="K8S互动教程2-部署一个应用">
+<meta name="twitter:description" content="本文是《浅入浅出k8s实战-k8s初体验篇的第三篇 》  此文为提取大纲，按照互动教程进行分享教学用。另补充一些知识点，和关联操作。 原文：  中：https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/deploy-intro/ 英：https://kubernetes.io/docs/tutorials/kubernetes-bas">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2019/svg/328984/1558525566332-b2e4462e-beaa-4b60-b41a-d5397aa78548.svg#align=left&display=inline&height=385&originHeight=385&originWidth=476&size=0&status=done&width=476">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-2">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  
+    <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    bookmark: {"enable":false,"save":"auto"},
+    fancybox: true,
+    mediumzoom: ,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false},
+    path: 'search.xml',
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  
+  <title>K8S互动教程2-部署一个应用 | Khan</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ba4657930258f8017b452935fd29ce61";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+  <script>
+    !function(e,t,n,g,i){e[i]=e[i]||function(){(e[i].q=e[i].q||[]).push(arguments)},n=t.createElement("script"),tag=t.getElementsByTagName("script")[0],n.async=1,n.src=('https:'==document.location.protocol?'https://':'http://')+g,tag.parentNode.insertBefore(n,tag)}(window,document,"script","assets.growingio.com/2.1/gio.js","gio");
+    gio('init','989beeea115aad9c', {});
+    gio('send');
+  </script>
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Khan</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">折腾各种技术，痛并快乐着~</h1>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-2.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Khan">
+      <meta itemprop="description" content="just do IT">
+      <meta itemprop="image" content="https://blog.pic.ikhan.top/20181211093420-global-avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Khan">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">K8S互动教程2-部署一个应用
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-22 19:39:35" itemprop="dateCreated datePublished" datetime="2019-05-22T19:39:35+08:00">2019-05-22</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-05-23 15:29:07" itemprop="dateModified" datetime="2019-05-23T15:29:07+08:00">2019-05-23</time>
+              </span>
+            
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/容器-浅入浅出k8s实战/" itemprop="url" rel="index"><span itemprop="name">容器,浅入浅出k8s实战</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/posts/qrqc-basic-k8s-interactive-tutorial-2.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/posts/qrqc-basic-k8s-interactive-tutorial-2.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+            <span id="/posts/qrqc-basic-k8s-interactive-tutorial-2.html" class="post-meta-item leancloud_visitors" data-flag-title="K8S互动教程2-部署一个应用">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读次数：</span>
+              
+                <span class="leancloud-visitors-count"></span>
+            </span>
+          
+
+          
+
+          
+
+          <br>
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">本文字数：</span>
+              
+              <span title="本文字数">4.3k</span>
+            </span>
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              
+              <span title="阅读时长">4 分钟</span>
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>本文是《浅入浅出k8s实战-k8s初体验篇的第三篇 》</p>
+</blockquote>
+<p>此文为提取大纲，按照互动教程进行分享教学用。另补充一些知识点，和关联操作。</p>
+<p>原文：</p>
+<ul>
+<li>中：<a href="https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/deploy-intro/" rel="external nofollow noopener noreferrer" target="_blank">https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/deploy-intro/</a></li>
+<li>英：<a href="https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/" rel="external nofollow noopener noreferrer" target="_blank">https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/</a></li>
+<li>互动：<a href="https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-interactive/" rel="external nofollow noopener noreferrer" target="_blank">https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-interactive/</a><br><a name="mnyq9"></a><h1 id="课程说明"><a href="#课程说明" class="headerlink" title="课程说明"></a>课程说明</h1></li>
+</ul>
+<p><a name="g0oq9"></a></p>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><ul>
+<li>了解应用 Deployments</li>
+<li>使用 kubectl 在 Kubernetes 上部署您的第一个应用程序</li>
+<li>熟悉常用的 kubectl 命令</li>
+</ul>
+<a id="more"></a>
+
+<p><a name="b9NpW"></a></p>
+<h3 id="操作内容"><a href="#操作内容" class="headerlink" title="操作内容"></a>操作内容</h3><ul>
+<li><p>kubectl 基础，查看 k8s 集群基本信息</p>
+</li>
+<li><p>命令方式部署应用</p>
+</li>
+<li><p>获取应用信息<br><a name="TyM7F"></a></p>
+<h3 id="Kubernetes-Deployments"><a href="#Kubernetes-Deployments" class="headerlink" title="Kubernetes Deployments"></a>Kubernetes Deployments</h3></li>
+<li><p>创建一个 Deployment，实际是在集群中创建 Deployment 配置，或者说把配置应用到集群中</p>
+</li>
+<li><p>Deployment 指示 K8S 如何去创建和更新应用程序实例</p>
+</li>
+<li><p>Kubernetes master 会将上述应用程序实例调度到集群中的各个 Node。</p>
+</li>
+<li><p>Kubernetes  Deployment Controller 会持续监视这些实例，如果托管它的 Node 不可用或被删除，则 Deployment Controller 将替换原实例为集群中其他 Node 上的新实例。（自愈机制）</p>
+</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2019/svg/328984/1558525566332-b2e4462e-beaa-4b60-b41a-d5397aa78548.svg#align=left&display=inline&height=385&originHeight=385&originWidth=476&size=0&status=done&width=476" alt><br><a name="TjFxq"></a></p>
+<h2 id="互动教程"><a href="#互动教程" class="headerlink" title="互动教程"></a>互动教程</h2><p><a name="7T2MU"></a></p>
+<h3 id="Kubectl-基础"><a href="#Kubectl-基础" class="headerlink" title="Kubectl 基础"></a>Kubectl 基础</h3><p>kubectl 命令通常的格式是 <code>kubectl action resource</code> 。就是 <code>kubectl</code>  后跟动作/命令，紧接着是要操作的资源。而资源由类型和名称定义。详细可以参照另一篇文章<a href="https://www.ikhan.top/posts/overview-of-kubectl.html">Kubectl 命令参考</a>。<br>每一个命令都可以通过 <code>--help</code> 获得更多的信息，比如 <code>kubectl get --help</code> , <code>get</code> 是我们要经常用的命令。</p>
+<p>首先，通过 <code>kubectl version</code> 看一下我们的 kubectl 版本信息和他所对应的集群版本信息。<br>通过 <code>kubectl get nodes</code> 看一下集群里面的节点信息。</p>
+<p>我们这节要操作的资源是 <code>Deployment</code> ，所以我们可以先通过 <code>kubectl get deployment</code> ，如果你看过我们上面提到的<a href="https://www.ikhan.top/posts/overview-of-kubectl.html">Kubectl 命令参考</a>，你就知道，命令中的 <code>deployment</code> 属于资源类型，它的大小写，单复数并不重要。在我们集群中有了 Deployment 类型的资源后（下面的操作就会告诉你如何创建），你可以通过 <code>kubectl get deployment</code> ， <code>kubectl get deployments</code> ， <code>kubectl get deploy</code> ， <code>kubectl get Deployment</code> 等获得一样的效果。<br>如果你是新的集群，你应该看到 <code>no resources found</code> 提示，否则可能已经有一些资源存在了。记得后面的命令自己修改名字来避免重复。</p>
+<p><a name="NVQXd"></a></p>
+<h2 id="部署一个应用"><a href="#部署一个应用" class="headerlink" title="部署一个应用"></a>部署一个应用</h2><p><code>kubectl run</code> 命令可以创建一个 Deployment 来管理容器。其常用的命令格式是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl run NAME --image=image [--env=<span class="string">"key=value"</span>] [--port=port] [--replicas=replicas] [--dry-run=bool]</span><br><span class="line">[--overrides=inline-json] [--<span class="built_in">command</span>] -- [COMMAND] [args...] [options]</span><br></pre></td></tr></table></figure>
+
+<p>参数大多根据名字就能理解，主要的两个参数，<code>NAME</code> 是 Deployment 的名字， <code>--image</code> 指定镜像。进一步理解你肯定记得 <code>--help</code> 大法。</p>
+<p>我们接下来通过 <code>kubectl run</code> 运行一个容器 <a href="https://github.com/clarkhan/whoami" rel="external nofollow noopener noreferrer" target="_blank">registry.cn-hangzhou.aliyuncs.com/khan/whoami</a>。</p>
+<p>这是一个可以输出 Http 请求信息的 docker 镜像，后面我们会经常使用。<br>其输出信息如下：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Hostname :  6e0030e67d6a</span><br><span class="line">IP :  127.0.0.1</span><br><span class="line">IP :  ::1</span><br><span class="line">IP :  172.17.0.27</span><br><span class="line">IP :  fe80::42:acff:fe11:1b</span><br><span class="line"><span class="builtin-name">GET</span> / HTTP/1.1</span><br><span class="line">Host: 0.0.0.0:32769</span><br><span class="line">User-Agent: curl/7.35.0</span><br><span class="line">Accept: */*</span><br></pre></td></tr></table></figure>
+
+<p>OK，启动这个镜像：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl run first-deploy-whoami --image=registry.cn-hangzhou.aliyuncs.com/khan/whoami:1.0 --port=80</span><br></pre></td></tr></table></figure>
+
+<p>我们可能会看到如下的提示信息:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="builtin-name">run</span> <span class="attribute">--generator</span>=deployment/apps.v1 is DEPRECATED <span class="keyword">and</span> will be removed <span class="keyword">in</span> a future version. Use kubectl <span class="builtin-name">run</span> <span class="attribute">--generator</span>=run-pod/v1 <span class="keyword">or</span> kubectl create instead.</span><br><span class="line">deployment.apps/first-deploy-whoami created</span><br></pre></td></tr></table></figure>
+
+<p>最后是提示创建成功，然而成功提示的上面的是什么呢。容我埋个伏笔，我们稍后再解释。</p>
+<p>成功启动容器后，我们可以通过 <code>kubectl get deployments</code> 来查看刚刚创建的资源。你应该能看到这样的输出：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                  READY   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">first-deploy-whoami   <span class="number">1</span>/<span class="number">1</span>     <span class="number">1</span>            <span class="number">1</span>           <span class="number">6</span>s</span><br></pre></td></tr></table></figure>
+
+<p><a name="mA7Rd"></a></p>
+<h2 id="查看你的应用"><a href="#查看你的应用" class="headerlink" title="查看你的应用"></a>查看你的应用</h2><p>容器化的应用运行在集群内部（Kubernetes 集群中，我们称之为 Pod，是最小的调度单元），使用的是集群内部的网络。这个网通通常默认是私有的隔离的，对同一个Kubernetes 集群内部其他的容器和服务可见，但是集群外并不可以。当我们使用 <code>kubectl</code> 的时候，我们是通过一个 API 端点和集群进行通信。这个 API 端点是需要额外的认证和配置的，用外部工具如 <code>curl</code> 或浏览器等没有权限。</p>
+<p>后续，我们会在互动教程4中来看如何通过其他的方式把应用（Pod）暴露到 kubernetes 集群之外。此节我们先通过 API 的本地 proxy 来实现。</p>
+<p><code>kube proxy</code> 命令能够创建一个本地的代理，转发通信请求到集群的私有网络。control-C可以关闭这个代理。<br>我们启动这个代理，默认情况下是绑定到 8001 端口，我们可以改为其他段扣，此处指定 8081：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl<span class="built_in"> proxy </span>--port 8081</span><br></pre></td></tr></table></figure>
+
+<p>然后我们通过 <a href="http://localhost:8081/" rel="external nofollow noopener noreferrer" target="_blank">http://localhost:8081</a> 就可以访问到这个服务器信息，其会返回 JSON 格式的接口列表信息。可以通过 <code>[http://localhost:8081/version](http://localhost:8081/version)</code> 访问到版本号信息，和我们 <code>kubectl version</code> 拿到的服务器信息一致。</p>
+<p>API Server 会自动地为每个 Pod 创建一个基于 Pod 名称的可访问端点。首先，我们需要获取这个 Pod 的名称。将其存储到上下文变量 POD_NAME 中，由于上一个命令行正在运行 proxy，我们打开新的命令行运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POD_NAME=$(kubectl get pods -o go-template --template <span class="string">'&#123;&#123;range .items&#125;&#125;&#123;&#123;.metadata.name&#125;&#125;&#123;&#123;"\n"&#125;&#125;&#123;&#123;end&#125;&#125;'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>现在，我们可以通过 Http 请求来访问这个pod：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:8081/api/v1/namespaces/default/pods/<span class="variable">$POD_NAME</span>/proxy/</span><br></pre></td></tr></table></figure>
+
+<p>应该可以输出如下的信息：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Hostname:</span> <span class="string">first-deploy-whoami-68dd7db55-bpr52</span></span><br><span class="line"><span class="attr">IP:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line"><span class="attr">IP:</span> <span class="number">172.17</span><span class="number">.0</span><span class="number">.2</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/</span> <span class="string">HTTP/1.1</span></span><br><span class="line"><span class="attr">Host:</span> <span class="string">localhost:8081</span></span><br><span class="line"><span class="attr">User-Agent:</span> <span class="string">curl/7.58.0</span></span><br><span class="line"><span class="attr">Accept:</span> <span class="string">*/*</span></span><br><span class="line"><span class="attr">Accept-Encoding:</span> <span class="string">gzip</span></span><br><span class="line"><span class="attr">X-Forwarded-For:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">,</span> <span class="number">192.168</span><span class="number">.99</span><span class="number">.1</span></span><br><span class="line"><span class="attr">X-Forwarded-Uri:</span> <span class="string">/api/v1/namespaces/default/pods/first-deploy-whoami-68dd7db55-bpr52/proxy/</span></span><br></pre></td></tr></table></figure>
+
+<p>你也可以通过浏览器访问 <a href="http://localhost:8081/api/v1/namespaces/default/pods/" rel="external nofollow noopener noreferrer" target="_blank">http://localhost:8081/api/v1/namespaces/default/pods/</a> 可以看到所有 pod，然后将名称复制下来，组成同样的链接访问。</p>
+<p>在上面的信息中，我们可以看到， <code>X-Forwarded-For</code> 和 <code>X-Forwarded-Uri</code> 两个应用收到的请求头表名这是一个通过代理的访问。</p>
+<p><a name="W7Xyp"></a></p>
+<h2 id="结束你的应用"><a href="#结束你的应用" class="headerlink" title="结束你的应用"></a>结束你的应用</h2><p>可以通过 <code>kubectl delete</code> 命令删除我们刚刚的 Deployment：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete deployment fisrt-deploy-whoami</span><br></pre></td></tr></table></figure>
+
+<p>命令简单易懂，就不再解释了。</p>
+<p><a name="aRkWf"></a></p>
+<h2 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h2><p>回到上面我们埋下的伏笔， <code>kubectl run</code> 中 <code>DEPRECATED</code> 的信息。其文档中有说明</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> --generator=<span class="string">''</span>: The name of the API generator to use, see</span><br><span class="line">http:<span class="regexp">//</span>kubernetes.io<span class="regexp">/docs/u</span>ser-guide<span class="regexp">/kubectl-conventions/</span><span class="comment">#generators for a list.</span></span><br></pre></td></tr></table></figure>
+
+<p>实际上， <code>--generator</code> 是指示  <code>kubectl run</code> 命令最终生成什么资源。用不用的生成器，生成的资源就不同。目前（1.14.2）默认生成器是 <code>deployment/apps.v1</code> <br>我们可以访问 <a href="https://kubernetes.io/docs/reference/kubectl/conventions/#generators" rel="external nofollow noopener noreferrer" target="_blank">https://kubernetes.io/docs/reference/kubectl/conventions/#generators</a> 查看所有的生成器。<br>如果切换为如下的命令，将不再有提示，但请注意命令执行后的描述，而且，执行这条命令并不会和同名的 deployment 冲突，之前的 deployment删除和不删除都无印象。你能知道为什么以及如何查看新生产的资源吗？</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="builtin-name">run</span> first-deploy-whoami <span class="attribute">--image</span>=registry.cn-hangzhou.aliyuncs.com/khan/whoami:1.0 <span class="attribute">--port</span>=80 <span class="attribute">--generator</span>=run-pod/v1</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+
+    
+      
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>谢谢鼓励</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150407-wechatpay-khan.png" alt="Khan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150331-Alipay-khan.png" alt="Khan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Khan</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-2.html" title="K8S互动教程2-部署一个应用">https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-2.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+            <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          
+            <a href="/tags/浅入浅出k8s实战/" rel="tag"># 浅入浅出k8s实战</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/spinnaker-deploy-crd.html" rel="next" title="Spinnaker 部署 CRD 资源">
+                <i class="fa fa-chevron-left"></i> Spinnaker 部署 CRD 资源
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/overview-of-kubectl.html" rel="prev" title="Kubectl 命令参考">
+                Kubectl 命令参考 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  
+    <img class="site-author-image" itemprop="image" src="https://blog.pic.ikhan.top/20181211093420-global-avatar.png" alt="Khan">
+  
+  <p class="site-author-name" itemprop="name">Khan</p>
+  <div class="site-description motion-element" itemprop="description">just do IT</div>
+</div>
+
+
+  <nav class="site-state motion-element">
+    
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+
+
+
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+
+
+  <div class="links-of-author motion-element">
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="/git@github.com:clarkhan" title="GitHub &rarr; git@github.com:clarkhan"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:clarkhan@163.com" title="E-Mail &rarr; mailto:clarkhan@163.com" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+  <div class="cc-license motion-element" itemprop="license">
+  
+  
+    
+  
+  
+  
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="external nofollow noopener noreferrer" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+
+
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#课程说明"><span class="nav-number">1.</span> <span class="nav-text">课程说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#目标"><span class="nav-number">1.0.1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#操作内容"><span class="nav-number">1.0.2.</span> <span class="nav-text">操作内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes-Deployments"><span class="nav-number">1.0.3.</span> <span class="nav-text">Kubernetes Deployments</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#互动教程"><span class="nav-number">1.1.</span> <span class="nav-text">互动教程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubectl-基础"><span class="nav-number">1.1.1.</span> <span class="nav-text">Kubectl 基础</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署一个应用"><span class="nav-number">1.2.</span> <span class="nav-text">部署一个应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看你的应用"><span class="nav-number">1.3.</span> <span class="nav-text">查看你的应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结束你的应用"><span class="nav-number">1.4.</span> <span class="nav-text">结束你的应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#补充"><span class="nav-number">1.5.</span> <span class="nav-text">补充</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">  <a href="http://www.beian.miit.gov.cn" rel="external nofollow noopener noreferrer" target="_blank">苏ICP备18070412号 </a>&copy; 2015 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Khan</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">109k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">1:39</span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+
+  
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.2.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.2.0"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+<script src="//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'kkqquVhYL2YnDXXyE2hyEDxl-gzGzoHsz',
+    appKey: 'SUyVEH4lL1HnSmYQUKeWjprm',
+    placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

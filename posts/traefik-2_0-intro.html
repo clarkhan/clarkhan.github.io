@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="theme-next gemini" lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    }
+  };
+</script>
+
+  <meta name="description" content="traefik 是一个开源的反向代理和负载均衡工具，现在官方介绍中将其定位为云原生的边缘路由器，且用了一堆修饰词：简单、自动、高速、全面、开源、产品级、内置监控指标和主流集群技术集成等等。当然，官方如此描述也是有理有据的，其开源后热度直线上升，而且被广泛使用，尤其是在当下的“微服务”、“云原生”场景。从我个人的角度讲，其相对于传统的反向代理显得更“现代”：  动态的更新配置，不需要重启/reloa">
+<meta name="keywords" content="k8s,kubernetes,traefik">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Traefik 2.0 介绍">
+<meta property="og:url" content="https://www.ikhan.top/posts/traefik-2_0-intro.html">
+<meta property="og:site_name" content="Khan">
+<meta property="og:description" content="traefik 是一个开源的反向代理和负载均衡工具，现在官方介绍中将其定位为云原生的边缘路由器，且用了一堆修饰词：简单、自动、高速、全面、开源、产品级、内置监控指标和主流集群技术集成等等。当然，官方如此描述也是有理有据的，其开源后热度直线上升，而且被广泛使用，尤其是在当下的“微服务”、“云原生”场景。从我个人的角度讲，其相对于传统的反向代理显得更“现代”：  动态的更新配置，不需要重启/reloa">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/png/328984/1561945084301-b70060bb-6a79-423b-8569-f4c526b6c340.png#align=left&display=inline&height=1501&originHeight=1501&originWidth=2875&size=0&status=done&width=2875">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336494-7126bbfb-8fe7-4cbf-9da4-b94ffcb4ee77.png#align=left&display=inline&height=940&originHeight=940&originWidth=2000&size=0&status=done&width=2000">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336566-c7a38b11-fffb-4873-85d2-b6727562f510.png#align=left&display=inline&height=1027&originHeight=1027&originWidth=1600&size=0&status=done&width=1600">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336288-f5992809-8871-4b2f-9df9-47d75dc9c155.png#align=left&display=inline&height=983&originHeight=983&originWidth=1800&size=0&status=done&width=1800">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336484-9c7f3b19-8a4e-40c0-b974-3f31b006dc78.png#align=left&display=inline&height=1064&originHeight=1064&originWidth=1600&size=0&status=done&width=1600">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336479-c3501663-4a91-48e4-8bf3-9809f9b18d33.png#align=left&display=inline&height=1139&originHeight=1139&originWidth=1600&size=0&status=done&width=1600">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336302-918a40dd-2ff1-4012-b80b-48f98832ee60.png#align=left&display=inline&height=931&originHeight=931&originWidth=1600&size=0&status=done&width=1600">
+<meta property="og:updated_time" content="2019-07-01T11:40:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Traefik 2.0 介绍">
+<meta name="twitter:description" content="traefik 是一个开源的反向代理和负载均衡工具，现在官方介绍中将其定位为云原生的边缘路由器，且用了一堆修饰词：简单、自动、高速、全面、开源、产品级、内置监控指标和主流集群技术集成等等。当然，官方如此描述也是有理有据的，其开源后热度直线上升，而且被广泛使用，尤其是在当下的“微服务”、“云原生”场景。从我个人的角度讲，其相对于传统的反向代理显得更“现代”：  动态的更新配置，不需要重启/reloa">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2019/png/328984/1561945084301-b70060bb-6a79-423b-8569-f4c526b6c340.png#align=left&display=inline&height=1501&originHeight=1501&originWidth=2875&size=0&status=done&width=2875">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ikhan.top/posts/traefik-2_0-intro">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  
+    <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    bookmark: {"enable":false,"save":"auto"},
+    fancybox: true,
+    mediumzoom: ,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false},
+    path: 'search.xml',
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  
+  <title>Traefik 2.0 介绍 | Khan</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ba4657930258f8017b452935fd29ce61";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+  <script>
+    !function(e,t,n,g,i){e[i]=e[i]||function(){(e[i].q=e[i].q||[]).push(arguments)},n=t.createElement("script"),tag=t.getElementsByTagName("script")[0],n.async=1,n.src=('https:'==document.location.protocol?'https://':'http://')+g,tag.parentNode.insertBefore(n,tag)}(window,document,"script","assets.growingio.com/2.1/gio.js","gio");
+    gio('init','989beeea115aad9c', {});
+    gio('send');
+  </script>
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Khan</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">折腾各种技术，痛并快乐着~</h1>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ikhan.top/posts/traefik-2_0-intro.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Khan">
+      <meta itemprop="description" content="just do IT">
+      <meta itemprop="image" content="https://blog.pic.ikhan.top/20181211093420-global-avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Khan">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Traefik 2.0 介绍
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-29 21:30:24" itemprop="dateCreated datePublished" datetime="2019-04-29T21:30:24+08:00">2019-04-29</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-01 19:40:40" itemprop="dateModified" datetime="2019-07-01T19:40:40+08:00">2019-07-01</time>
+              </span>
+            
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代理/" itemprop="url" rel="index"><span itemprop="name">代理</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/posts/traefik-2_0-intro.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/posts/traefik-2_0-intro.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+            <span id="/posts/traefik-2_0-intro.html" class="post-meta-item leancloud_visitors" data-flag-title="Traefik 2.0 介绍">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读次数：</span>
+              
+                <span class="leancloud-visitors-count"></span>
+            </span>
+          
+
+          
+
+          
+
+          <br>
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">本文字数：</span>
+              
+              <span title="本文字数">6.5k</span>
+            </span>
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              
+              <span title="阅读时长">6 分钟</span>
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>traefik 是一个开源的反向代理和负载均衡工具，现在官方介绍中将其定位为云原生的边缘路由器，且用了一堆修饰词：简单、自动、高速、全面、开源、产品级、内置监控指标和主流集群技术集成等等。<br>当然，官方如此描述也是有理有据的，其开源后热度直线上升，而且被广泛使用，尤其是在当下的“微服务”、“云原生”场景。<br><img src="https://cdn.nlark.com/yuque/0/2019/png/328984/1561945084301-b70060bb-6a79-423b-8569-f4c526b6c340.png#align=left&display=inline&height=1501&originHeight=1501&originWidth=2875&size=0&status=done&width=2875" alt><br>从我个人的角度讲，其相对于传统的反向代理显得更“现代”：</p>
+<ul>
+<li>动态的更新配置，不需要重启/reload等操作。</li>
+<li>原生支持Docker, Swarm mode, Kubernetes, Marathon, Consul, Etcd, Rancher, Amazon ECS等等后端。</li>
+<li>支持 RestAPI</li>
+<li>支持后端健康状态检查，根据状态自动地配置</li>
+</ul>
+<p>这些特点，让其在云原生的场景下更贴合。而traefik本身的特性远不止如此。大家有兴趣可阅读它的官方文档：<a href="https://docs.traefik.io/" rel="external nofollow noopener noreferrer" target="_blank">https://docs.traefik.io/</a>，而且国内的资料介绍也很多。<br>本篇文章的背景是因为工作中用到了版本2中的一些特性，但国内关于新版的介绍资料较少，遂对 <a href="https://blog.containo.us/back-to-traefik-2-0-2f9aa17be305" rel="external nofollow noopener noreferrer" target="_blank">back to traefik 2.0</a> 这篇文章的核心部分做了简单翻译提取。如有理解错漏，请指正。</p>
+<p>目前（2019年5月21日）2.0 正在开发中，alpha4 版本在 4月17日发布。我们一起看看 2.0 有哪些东西。</p>
+<a id="more"></a>
+<p><a name="2af44481"></a></p>
+<h2 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h2><p><img src="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336494-7126bbfb-8fe7-4cbf-9da4-b94ffcb4ee77.png#align=left&display=inline&height=940&originHeight=940&originWidth=2000&size=0&status=done&width=2000" alt></p>
+<ul>
+<li>Providers 是指你正在使用的集群技术 (Kubernetes, Docker, Consul, Mesos, Rancher…). Traefik 通过 provider 的 API 来发现对应到你的服务的 routes（路由）.</li>
+<li>Entrypoints, 是最基本的配置，指监听请求的端口.</li>
+<li>Services 是在你的基础设施上的运行的软件的体现. Traefik 知道如何处理你的程序的多个实例(当前提供多种负载均衡的能力/方法), 然后通过 services 配置如何联通到真实的运行程序.</li>
+<li>Routers 将传入的请求和你的 service 连接起来. 他们持有的 rules 决定哪个 service 将处理对应的请求.</li>
+<li>最后, 中间件是可以在请求被 service 处理之前对其进行更新的组件.Traefik 提供了一些开箱即用的中间件来处理 认证、速率限制、断路器、白名单、缓冲等等.</li>
+</ul>
+<p><a name="746fffa9"></a></p>
+<h2 id="配置结构"><a href="#配置结构" class="headerlink" title="配置结构"></a>配置结构</h2><p><img src="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336566-c7a38b11-fffb-4873-85d2-b6727562f510.png#align=left&display=inline&height=1027&originHeight=1027&originWidth=1600&size=0&status=done&width=1600" alt></p>
+<p>从图中可以看到，配置氛围静态配置和动态配置。</p>
+<ul>
+<li>静态配置，启动的时候加载。包括 Entrypoints、Provider 连接信息</li>
+<li>动态配置，运行时可动态读取改变的。包括 Routes、Services、Middlewares、Certificates 。</li>
+</ul>
+<p><a name="6073d869"></a></p>
+<h2 id="新特性"><a href="#新特性" class="headerlink" title="新特性"></a>新特性</h2><p><a name="f8332bf8"></a></p>
+<h3 id="TCP-支持"><a href="#TCP-支持" class="headerlink" title="TCP 支持"></a>TCP 支持</h3><p>历时三年，经过大量的讨论和开发，目前 traefik 完全支持 TCP 协议。</p>
+<p>示例如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[entrypoints]</span></span><br><span class="line">   <span class="section">[entrypoints.web]</span></span><br><span class="line">      address = ":80"</span><br><span class="line"><span class="section">[entrypoints.mongo-port]</span></span><br><span class="line">      address = ":27017"</span><br><span class="line"><span class="section">[tcp]</span> <span class="comment"># YAY!</span></span><br><span class="line">   <span class="section">[tcp.routers]</span></span><br><span class="line">      <span class="section">[tcp.routers.everything-to-mongo]</span></span><br><span class="line">         entrypoints = ["mongo-port"]</span><br><span class="line">         rule = "HostSNI(`*`)" # Catches every request       </span><br><span class="line">         service = "database"</span><br></pre></td></tr></table></figure>
+
+<p>使用 FileProvider，重定向所有 27010 端口的请求到数据库服务。</p>
+<p>来看更厉害的，Traefik 支持基于 SNIs 的路由：</p>
+<blockquote>
+<p>服务器名称指示(SNI)是TLS计算机网络协议的扩展，通过该协议，客户机在握手过程开始时指示要连接到哪个主机名。这允许服务器在相同的IP地址和TCP端口号上显示多个证书，因此允许由相同的IP地址提供多个安全(HTTPS)站点(或TLS上的任何其他服务)，而不需要所有这些站点使用相同的证书。它在概念上等同于HTTP/1.1基于名称的虚拟主机，但适用于HTTPS。所需的主机名在原始SNI扩展中没有加密，因此窃听者可以看到请求的是哪个站点。</p>
+</blockquote>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[entrypoints]</span></span><br><span class="line">   <span class="section">[entrypoints.web]</span></span><br><span class="line">      address = ":80"</span><br><span class="line"><span class="section">[entrypoints.mongo-port]</span></span><br><span class="line">      address = ":27017"</span><br><span class="line"><span class="section">[tcp]</span> <span class="comment"># YAY!</span></span><br><span class="line">   <span class="section">[tcp.routers]</span></span><br><span class="line">      <span class="section">[tcp.routers.to-db-1]</span></span><br><span class="line">         entrypoints = ["mongo-port"]</span><br><span class="line">         rule = "HostSNI(`db-1.domain`)"       </span><br><span class="line">         service = "db-1"</span><br><span class="line">         <span class="section">[tcp.routers.to-db-1.tls]</span> <span class="comment"># The route is for TLS requests only</span></span><br><span class="line">      <span class="section">[tcp.routers.to-db-2]</span></span><br><span class="line">         entrypoints = ["mongo-port"]</span><br><span class="line">         rule = "HostSNI(`db-2.domain`)"       </span><br><span class="line">         service = "db-2"</span><br><span class="line">         <span class="section">[tcp.routers.to-db-2.tls]</span> <span class="comment"># The route is for TLS requests only</span></span><br></pre></td></tr></table></figure>
+
+<p>更更厉害的呢？Traefik 可以牛到在同一个端口上同时支持 HTTP 和 TCP。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[entrypoints]</span></span><br><span class="line">   <span class="section">[entrypoints.the-one]</span></span><br><span class="line">      address = ":443"</span><br><span class="line"><span class="section">[tcp]</span></span><br><span class="line">   <span class="section">[tcp.routers]</span></span><br><span class="line">      <span class="section">[tcp.routers.to-db-1]</span></span><br><span class="line">         rule = "HostSNI(`db-1.domain`)"       </span><br><span class="line">         service = "db-1"</span><br><span class="line">         <span class="section">[tcp.routers.to-db-1.tls]</span> <span class="comment"># The route is for TLS requests only</span></span><br><span class="line"><span class="section">[http]</span></span><br><span class="line">   <span class="section">[http.routers]</span></span><br><span class="line">      <span class="section">[http.routers.my-api]</span></span><br><span class="line">         rule = "Host(`api.domain`)"       </span><br><span class="line">         service = "my-api"</span><br></pre></td></tr></table></figure>
+
+<p>在它的第一个alpha版本中，Traefik 只在 FileProvider 中可以启用TCP路由，但是请做好准备，因为它很快就会对其他 Providers 可用!</p>
+<p><a name="c17b78cc"></a></p>
+<h3 id="用来更新请求的中间件（Middlewares）"><a href="#用来更新请求的中间件（Middlewares）" class="headerlink" title="用来更新请求的中间件（Middlewares）"></a>用来更新请求的中间件（Middlewares）</h3><p><img src="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336288-f5992809-8871-4b2f-9df9-47d75dc9c155.png#align=left&display=inline&height=983&originHeight=983&originWidth=1800&size=0&status=done&width=1800" alt></p>
+<p>过去很多特性被嵌入到 Traefik 中，但没有针对性的定制和对应选项去调整。</p>
+<p>Middlewares 填补了这一空白。你可以做到针对每一个 router 开启和调整相关特性。</p>
+<p>Middlewares 是在请求实际转发到服务之前对其进行操作的组件，如果不满足要求的条件，甚至可以决定不转发请求。</p>
+<p>在发布时，Traefik附带了以下中间件:</p>
+<ul>
+<li>AddPrefix(给请求添加一个前缀路径)</li>
+<li>BasicAuth</li>
+<li>DigestAuth</li>
+<li>ForwardAuth(委托第三方服务身份验证)</li>
+<li>Buffering</li>
+<li>Chain (定义可重用的Middleware集和)</li>
+<li>CircuitBreaker (断路器，避免调用压垮服务)</li>
+<li>Compress</li>
+<li>Errors(提供自定义的错误页面)</li>
+<li>Headers</li>
+<li>IpWhitelist</li>
+<li>MaxConn(限制连接到服务的并发连接数)</li>
+<li>PassTLSClientCert</li>
+<li>RateLimit(在给定时间段内限制对服务的请求数量)</li>
+<li>RedirectRegex</li>
+<li>RedirectScheme</li>
+<li>ReplacePath(在转发到服务之前更新请求路径)。</li>
+</ul>
+<p>更重要的，项目重构了代码，使未来更方便地提供更多的中间件。</p>
+<p><a name="74f39680"></a></p>
+<h3 id="Kubernetes-amp-CRD（CustomResourceDefinition）"><a href="#Kubernetes-amp-CRD（CustomResourceDefinition）" class="headerlink" title="Kubernetes &amp; CRD（CustomResourceDefinition）"></a>Kubernetes &amp; CRD（CustomResourceDefinition）</h3><p>在过去两年里，社区围绕“更好的 ingress”进行了大量的讨论，回看之前的 kubernettes provider，我们认为还有改进的空间。对于V2，如果我们想让 k8s 用户直接从中受益（比如 TCP 和 middleware），而不被大量 annotations 困扰，我们必须提供新的选择。</p>
+<p>在备选方案中，CRD 越来越受欢迎，因为它们解决了ingress规范的缺点。受 Heptio 在 Contour 项目中的 IngressRoute 启发，我们扩展了这个规范来实现每个Traefik特性。</p>
+<p>下面是一个例子：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">traefik.containo.us/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">IngressRoute</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">test.crd</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">entrypoints:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">web</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">web-secure</span></span><br><span class="line">  <span class="attr">routes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">match:</span> <span class="string">Host(`traefik.io`)</span> <span class="string">&amp;&amp;</span> <span class="string">PathPrefix(`/foo`)</span></span><br><span class="line">      <span class="attr">kind:</span> <span class="string">Rule</span></span><br><span class="line">      <span class="attr">services:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">whoami1</span></span><br><span class="line">          <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line">          <span class="attr">strategy:</span> <span class="string">RoundRobin</span></span><br><span class="line">      <span class="attr">middlewares:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">stripprefix</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">addprefix</span></span><br><span class="line">          <span class="attr">namespace:</span> <span class="string">foo</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">match:</span> <span class="string">Host(`containo.us`)</span> <span class="string">&amp;&amp;</span> <span class="string">Method(`POST`)</span></span><br><span class="line">      <span class="attr">kind:</span> <span class="string">Rule</span></span><br><span class="line">      <span class="attr">services:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">whoami2</span></span><br><span class="line">          <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line">  <span class="attr">tls:</span></span><br><span class="line">    <span class="attr">secretName:</span> <span class="string">supersecret</span></span><br></pre></td></tr></table></figure>
+
+<p><a name="a5d46ed6"></a></p>
+<h3 id="新的更有表现力的路由规则语法"><a href="#新的更有表现力的路由规则语法" class="headerlink" title="新的更有表现力的路由规则语法"></a>新的更有表现力的路由规则语法</h3><p>Traefik 现在支持更有表现力的语法来定义 router rules，包含 <code>and</code>, <code>or</code> 和 <code>parenthesis</code>（括号）！</p>
+<p>可用的 matchers 有 Headers, HeadersRegexp, Host, HostRegexp, Method, Path, PathPrefix, and Query.</p>
+<p>由于 TCP 是完全不同的东东，所以目前只支持专用的 matcher：HostSNI。<br>Since TCP is a whole different world, for now, it only supports a dedicated matcher: HostSNI.</p>
+<p>来看个例子：</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rule = (<span class="constructor">Host(`<span class="params">api</span>.<span class="params">domain</span>`)</span><span class="operator"> &amp;&amp; </span><span class="constructor">PathPrefix(`<span class="operator">/</span><span class="params">v2</span>`)</span>)<span class="operator"> || </span><span class="constructor">Host(`<span class="params">api</span>-<span class="params">v2</span>.<span class="params">domain</span>`)</span></span><br><span class="line">rule = (<span class="constructor">Method(`DELETE`)</span><span class="operator"> || </span>(<span class="constructor">Method(`POST`)</span><span class="operator"> &amp;&amp; </span><span class="constructor">Query(`<span class="params">action</span>`, `<span class="params">delete</span>`)</span>))<span class="operator"> &amp;&amp; </span><span class="constructor">Host('<span class="params">api</span>.<span class="params">domain</span>')</span></span><br></pre></td></tr></table></figure>
+
+<p><a name="90aeab21"></a></p>
+<h3 id="Cross-Provider"><a href="#Cross-Provider" class="headerlink" title="Cross Provider"></a>Cross Provider</h3><p><img src="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336484-9c7f3b19-8a4e-40c0-b974-3f31b006dc78.png#align=left&display=inline&height=1064&originHeight=1064&originWidth=1600&size=0&status=done&width=1600" alt></p>
+<p>Traefik 一直与很多 providers 兼容, 这是他的优势之一：无论你的基础设施是什么，从裸机到各种协调器和集群方案，Traefik 都能搞定!</p>
+<p>但从 V2 开始，我们更进一步做到了让用户在一个 provider 中声明元素（middlewares, services, routers）在其他不同的 provider 中使用。</p>
+<p>让我们来看一个例子，例子中在配置文件中（file provider）声明了一个认证 middleware，在 Docker label（Docker Provider）中被使用。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># somewhere in a configuration file for the file provider</span></span><br><span class="line"><span class="section">[http.middlewares.my-users.basicauth]</span></span><br><span class="line">   users = ["test:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/", </span><br><span class="line">            "test2:$apr1$d9hr9HBB$4HxwgUir3HP4EsggP/QNo0"]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># somewhere in a docker compose file</span></span><br><span class="line">your-container:</span><br><span class="line">    image: your-docker-image</span><br><span class="line">    labels:</span><br><span class="line">      - "traefik.http.routers.my-router.middlewares=file.my-users"</span><br></pre></td></tr></table></figure>
+
+<p>当然，你可以在一个 provider 中声明 router 指向其他 provider 中定义的 services。</p>
+<p><a name="9534f50e"></a></p>
+<h3 id="TLS-Termination-per-Route"><a href="#TLS-Termination-per-Route" class="headerlink" title="TLS Termination per Route"></a>TLS Termination per Route</h3><p><img src="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336479-c3501663-4a91-48e4-8bf3-9809f9b18d33.png#align=left&display=inline&height=1139&originHeight=1139&originWidth=1600&size=0&status=done&width=1600" alt></p>
+<p>为了添加 TCP 支持到 Traefik 中，我们几乎重新思考了所有事情，从集群的大门-entrypoint 开始。</p>
+<p>我们起初的想法是每个入口点（包括其端口）指定一种类型的协议。不幸的是，在某些情况下，特别是当人们使用Traefik为多个集群路由请求时，我们认为它的限制太大。因此，我们允许每个入口点有多个协议。</p>
+<p>之后，讨论依然存在其他方面，我们一直在寻找让用户在配置TLS termination 或 passthrough 时有更好的控制方式。在路由器级别启用TLS的想法赢得了头脑风暴，然后通过了概念证明的测试(我们团队中有相当多的概念证明分支，以至于它几乎成为了一个迷因)。</p>
+<p>下面是三个路由器监听同一个入口点的例子，第一个 router 完成TLS连接(在HTTPS上)，第二个 router 完成TLS连接(在TCP上)，第三个 router 向后传递，将 TLS连接的细节处理交给服务本身。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[entrypoints]</span></span><br><span class="line">   <span class="section">[entrypoints.web-secure]</span></span><br><span class="line">      address = ":443"</span><br><span class="line"><span class="section">[http]</span></span><br><span class="line">   <span class="section">[http.routers.to-service-1]</span></span><br><span class="line">      rule = "Host(`domain-1`)"</span><br><span class="line">      service = "service-1"</span><br><span class="line">      <span class="section">[http.routers.to-service-1.tls]</span></span><br><span class="line">         <span class="comment"># terminates the tls connection and sends clear data</span></span><br><span class="line">         <span class="comment"># to service 1</span></span><br><span class="line"><span class="section">[tcp]</span></span><br><span class="line">   <span class="section">[tcp.routers.to-service-2]</span></span><br><span class="line">      rule = "HostSNI(`domain-2`)"</span><br><span class="line">      service = "service-2"</span><br><span class="line">      <span class="section">[tcp.routers.to-service-2.tls]</span></span><br><span class="line">         <span class="comment"># terminates the tls connection and sends clear data</span></span><br><span class="line">         <span class="comment"># to service 2</span></span><br><span class="line"><span class="section">[tcp.routers.to-service-3]</span></span><br><span class="line">      rule = "HostSNI(`domain-3`)"</span><br><span class="line">      service = "service-3"</span><br><span class="line">      <span class="section">[tcp.routers.to-service-3.tls]</span></span><br><span class="line">         passthrough = true # sends encrypted data "as is" to service-3</span><br></pre></td></tr></table></figure>
+
+<p><a name="c5c89dff"></a></p>
+<h3 id="Labels-Key-Value-Configuration-Tags-…"><a href="#Labels-Key-Value-Configuration-Tags-…" class="headerlink" title="Labels, Key-Value Configuration, Tags, …"></a>Labels, Key-Value Configuration, Tags, …</h3><p>这只是表面上的一个小调整，但是对代码有很大的影响，我们重新编写了配置解析器。这个新系统确保 Traefik 中的每个选项都有相同的路径，无论是否用TOML <code>[something.that.is.here]</code>或是容器上的一个 label <code>something.that.is.there</code> ，或是一个键(放在键值存储) <code>something/that/is/somewhere</code>，或者是将来可能可用的任何东西。</p>
+<p><a name="86f46d4d"></a></p>
+<h3 id="修改了文档"><a href="#修改了文档" class="headerlink" title="修改了文档"></a>修改了文档</h3><p><img src="https://cdn.nlark.com/yuque/0/2019/png/328984/1558438336302-918a40dd-2ff1-4012-b80b-48f98832ee60.png#align=left&display=inline&height=931&originHeight=931&originWidth=1600&size=0&status=done&width=1600" alt></p>
+<p>我们更新了文档结构来帮助用户快速的理解如何配置 Traefik。同时，我们列出了配置结构的大纲，让专业用户更方便的学习配置的细节。</p>
+<p><a name="dd289e46"></a></p>
+<h2 id="阅读最终版"><a href="#阅读最终版" class="headerlink" title="阅读最终版"></a>阅读最终版</h2><p>是的，更多的内容还在路上，只是我们（团队）迫不及待去分享了。</p>
+<blockquote>
+<p>新的 WebUI, 剩余的 providers, metrics, UDP, YAML, TLS stores &amp; options, canary（金丝雀）, 更多的文档 — 什么都是有可能的.</p>
+</blockquote>
+<p>除了重新启用其他 providers (alpha只支持 file、Docker和k8s)，并为所有这些 provider 启用TCP(目前只支持 file)之外，路线图还具有很多特性。</p>
+<p>首先，最明显的是，一个贡献者正在积极地开发一个经过改进的WebUI，从我们看到的模型来看，它看起来非常有前途。我们希望这个新UI能够帮助您无缝地浏览数百条路由。</p>
+<p>其次，我们正在对TLS配置进行改进，包括存储和选项，他们应该自解释。</p>
+<p>再次，既然我们已经尝试了一种新的协议，那么我们不妨添加其他协议(如UDP)。</p>
+<p>2.0 文档地址：<a href="https://docs.traefik.io/v2.0/" rel="external nofollow noopener noreferrer" target="_blank">https://docs.traefik.io/v2.0/</a>,大的变更地址：<a href="https://github.com/containous/traefik/blob/master/CHANGELOG.md" rel="external nofollow noopener noreferrer" target="_blank">https://github.com/containous/traefik/blob/master/CHANGELOG.md</a>.</p>
+
+      
+    </div>
+
+    
+
+    
+      
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>谢谢鼓励</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150407-wechatpay-khan.png" alt="Khan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150331-Alipay-khan.png" alt="Khan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Khan</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ikhan.top/posts/traefik-2_0-intro.html" title="Traefik 2.0 介绍">https://www.ikhan.top/posts/traefik-2_0-intro.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+            <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          
+            <a href="/tags/traefik/" rel="tag"># traefik</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/flush-chrome-dns.html" rel="next" title="快速清除浏览器 DNS 缓存">
+                <i class="fa fa-chevron-left"></i> 快速清除浏览器 DNS 缓存
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/helm-intro-and-install.html" rel="prev" title="Helm 介绍和安装">
+                Helm 介绍和安装 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  
+    <img class="site-author-image" itemprop="image" src="https://blog.pic.ikhan.top/20181211093420-global-avatar.png" alt="Khan">
+  
+  <p class="site-author-name" itemprop="name">Khan</p>
+  <div class="site-description motion-element" itemprop="description">just do IT</div>
+</div>
+
+
+  <nav class="site-state motion-element">
+    
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+
+
+
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+
+
+  <div class="links-of-author motion-element">
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="/git@github.com:clarkhan" title="GitHub &rarr; git@github.com:clarkhan"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:clarkhan@163.com" title="E-Mail &rarr; mailto:clarkhan@163.com" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+  <div class="cc-license motion-element" itemprop="license">
+  
+  
+    
+  
+  
+  
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="external nofollow noopener noreferrer" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+
+
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#核心概念"><span class="nav-number">1.</span> <span class="nav-text">核心概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置结构"><span class="nav-number">2.</span> <span class="nav-text">配置结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新特性"><span class="nav-number">3.</span> <span class="nav-text">新特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-支持"><span class="nav-number">3.1.</span> <span class="nav-text">TCP 支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用来更新请求的中间件（Middlewares）"><span class="nav-number">3.2.</span> <span class="nav-text">用来更新请求的中间件（Middlewares）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes-amp-CRD（CustomResourceDefinition）"><span class="nav-number">3.3.</span> <span class="nav-text">Kubernetes &amp; CRD（CustomResourceDefinition）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新的更有表现力的路由规则语法"><span class="nav-number">3.4.</span> <span class="nav-text">新的更有表现力的路由规则语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cross-Provider"><span class="nav-number">3.5.</span> <span class="nav-text">Cross Provider</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS-Termination-per-Route"><span class="nav-number">3.6.</span> <span class="nav-text">TLS Termination per Route</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Labels-Key-Value-Configuration-Tags-…"><span class="nav-number">3.7.</span> <span class="nav-text">Labels, Key-Value Configuration, Tags, …</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改了文档"><span class="nav-number">3.8.</span> <span class="nav-text">修改了文档</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#阅读最终版"><span class="nav-number">4.</span> <span class="nav-text">阅读最终版</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">  <a href="http://www.beian.miit.gov.cn" rel="external nofollow noopener noreferrer" target="_blank">苏ICP备18070412号 </a>&copy; 2015 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Khan</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">109k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">1:39</span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+
+  
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.2.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.2.0"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+<script src="//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'kkqquVhYL2YnDXXyE2hyEDxl-gzGzoHsz',
+    appKey: 'SUyVEH4lL1HnSmYQUKeWjprm',
+    placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

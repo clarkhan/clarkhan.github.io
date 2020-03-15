@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.ikhan.top/posts/hello-word.html</loc>
+    <lastmod>2020-03-15</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/set-up-git-server.html</loc>
+    <lastmod>2020-03-15</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/middleware-overview.html</loc>
+    <lastmod>2020-03-15</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/career-choice.html</loc>
+    <lastmod>2020-03-15</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/apt-get-error-timeout-was-reached-resolve.html</loc>
+    <lastmod>2020-03-15</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/docker-using-experience.html</loc>
+    <lastmod>2020-03-15</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/install-gitlab-zh-with-docker.html</loc>
+    <lastmod>2020-03-15</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/microservices-translation.html</loc>
+    <lastmod>2019-07-18</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/soa-microservices.html</loc>
+    <lastmod>2019-07-15</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/traefik-2_0-intro.html</loc>
+    <lastmod>2019-07-01</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/docker-mirrors.html</loc>
+    <lastmod>2019-05-30</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/docker-install-config.html</loc>
+    <lastmod>2019-05-30</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-4.html</loc>
+    <lastmod>2019-05-28</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/centos-7-hostname-config.html</loc>
+    <lastmod>2019-05-28</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/pod-can-not-traffic-to-isself-via-service.html</loc>
+    <lastmod>2019-05-28</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/k8s-concepts-pod-lifecyle.html</loc>
+    <lastmod>2019-05-26</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-3.html</loc>
+    <lastmod>2019-05-23</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-2.html</loc>
+    <lastmod>2019-05-23</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/overview-of-kubectl.html</loc>
+    <lastmod>2019-05-23</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/spinnaker-deploy-crd.html</loc>
+    <lastmod>2019-05-22</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/minikube-intro-and-install.html</loc>
+    <lastmod>2019-05-21</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/rancher-spinnaker-relative-chart-error.html</loc>
+    <lastmod>2019-05-21</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/helm-intro-and-install.html</loc>
+    <lastmod>2019-05-20</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/flush-chrome-dns.html</loc>
+    <lastmod>2019-05-18</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/linux-install-node-with-nvm.html</loc>
+    <lastmod>2015-07-12</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/linux-wpa2-peap-mschapv2-wifi-config.html</loc>
+    <lastmod>2015-07-12</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/install-hexo-and-config.html</loc>
+    <lastmod>2015-06-09</lastmod>
+  </url>  <url>
+    <loc>https://www.ikhan.top/posts/sync-git-and-svn-with-subgit.html</loc>
+    <lastmod>2015-06-03</lastmod>
+  </url>
+</urlset>

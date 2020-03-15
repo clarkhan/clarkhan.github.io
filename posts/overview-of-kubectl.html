@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="theme-next gemini" lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    }
+  };
+</script>
+
+  <meta name="description" content="Kubectl 是和 kubernetes 集群交互的命令行工具。 kubectl 会使用 $HOME/.kube/config 文件作为默认配置（也就是 kubeconfig）。我们可以通过设置环境变量 KUBECONFIG 或命令行选项 --kubeconfig 来指定 kubeconfig。 本文概述kubectl语法，介绍命令操作，并提供常见的示例。有关每个命令的详细信息，包括所有支持的">
+<meta name="keywords" content="k8s,kubernetes,kubectl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubectl 命令参考">
+<meta property="og:url" content="https://www.ikhan.top/posts/overview-of-kubectl.html">
+<meta property="og:site_name" content="Khan">
+<meta property="og:description" content="Kubectl 是和 kubernetes 集群交互的命令行工具。 kubectl 会使用 $HOME/.kube/config 文件作为默认配置（也就是 kubeconfig）。我们可以通过设置环境变量 KUBECONFIG 或命令行选项 --kubeconfig 来指定 kubeconfig。 本文概述kubectl语法，介绍命令操作，并提供常见的示例。有关每个命令的详细信息，包括所有支持的">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-05-23T06:39:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubectl 命令参考">
+<meta name="twitter:description" content="Kubectl 是和 kubernetes 集群交互的命令行工具。 kubectl 会使用 $HOME/.kube/config 文件作为默认配置（也就是 kubeconfig）。我们可以通过设置环境变量 KUBECONFIG 或命令行选项 --kubeconfig 来指定 kubeconfig。 本文概述kubectl语法，介绍命令操作，并提供常见的示例。有关每个命令的详细信息，包括所有支持的">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ikhan.top/posts/overview-of-kubectl">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  
+    <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    bookmark: {"enable":false,"save":"auto"},
+    fancybox: true,
+    mediumzoom: ,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false},
+    path: 'search.xml',
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  
+  <title>Kubectl 命令参考 | Khan</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ba4657930258f8017b452935fd29ce61";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+  <script>
+    !function(e,t,n,g,i){e[i]=e[i]||function(){(e[i].q=e[i].q||[]).push(arguments)},n=t.createElement("script"),tag=t.getElementsByTagName("script")[0],n.async=1,n.src=('https:'==document.location.protocol?'https://':'http://')+g,tag.parentNode.insertBefore(n,tag)}(window,document,"script","assets.growingio.com/2.1/gio.js","gio");
+    gio('init','989beeea115aad9c', {});
+    gio('send');
+  </script>
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Khan</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">折腾各种技术，痛并快乐着~</h1>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ikhan.top/posts/overview-of-kubectl.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Khan">
+      <meta itemprop="description" content="just do IT">
+      <meta itemprop="image" content="https://blog.pic.ikhan.top/20181211093420-global-avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Khan">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Kubectl 命令参考
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-22 20:39:35" itemprop="dateCreated datePublished" datetime="2019-05-22T20:39:35+08:00">2019-05-22</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-05-23 14:39:58" itemprop="dateModified" datetime="2019-05-23T14:39:58+08:00">2019-05-23</time>
+              </span>
+            
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/容器/" itemprop="url" rel="index"><span itemprop="name">容器</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/posts/overview-of-kubectl.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/posts/overview-of-kubectl.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+            <span id="/posts/overview-of-kubectl.html" class="post-meta-item leancloud_visitors" data-flag-title="Kubectl 命令参考">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读次数：</span>
+              
+                <span class="leancloud-visitors-count"></span>
+            </span>
+          
+
+          
+
+          
+
+          <br>
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">本文字数：</span>
+              
+              <span title="本文字数">19k</span>
+            </span>
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              
+              <span title="阅读时长">17 分钟</span>
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Kubectl 是和 kubernetes 集群交互的命令行工具。 <code>kubectl</code> 会使用 <code>$HOME/.kube/config</code> 文件作为默认配置（也就是 kubeconfig）。我们可以通过设置环境变量 <code>KUBECONFIG</code> 或命令行选项 <code>--kubeconfig</code> 来指定 kubeconfig。</p>
+<p>本文概述kubectl语法，介绍命令操作，并提供常见的示例。有关每个命令的详细信息，包括所有支持的 falgs 和子命令，请参阅<a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands" rel="external nofollow noopener noreferrer" target="_blank">kubectl参考文档</a> 。有关安装说明，请参阅<a href="https://www.ikhan.top/posts/minikube-intro-and-install.html#kubectl-%E5%AE%89%E8%A3%85">安装kubectl</a>。</p>
+<a id="more"></a>
+
+<p><a name="U5XGg"></a></p>
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><p>命令行使用可以总结为如下语法：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">kubectl</span> <span class="selector-attr">[command]</span> <span class="selector-attr">[TYPE]</span> <span class="selector-attr">[NAME]</span> <span class="selector-attr">[flags]</span></span><br></pre></td></tr></table></figure>
+
+<p>解释如下：</p>
+<ul>
+<li><p><code>command</code> 指定对一个或多个资源的操作，如 <code>create</code> ，<code>get</code> ，<code>describe</code> ，<code>delete</code> 。</p>
+</li>
+<li><p><code>TYPE</code> 指明了要操作的<a href="#资源类型">资源类型</a>。资源类型不区分大小写，可以使用单数、复数、缩写形式（注意，缩写是严格的，不能单复数大小写）。比如，如下几条命令有相同的输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod pod1</span><br><span class="line">kubectl get pods pod1</span><br><span class="line">kubectl get po pod1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>NAME</code> 指明资源名称。名称区分大小写，如果省略了资源名称，则展示此类所有资源的详情。如 <code>kubectl get pods</code> 。</p>
+</li>
+</ul>
+<p>在对多个资源应用一个操作的时候，可以按照资源的类型和名称分别指定每个资源，或指定一个或多个文件：</p>
+<ul>
+<li>通过类型和名称：<ul>
+<li>同一个类型分组： <code>TYPE1 name1 name2 name&lt;#&gt;</code> <br>如： <code>kubectl get pod example-pod1 example-pod2</code> </li>
+<li>具有不同类型的多个资源: <code>TYPE1/name1 TYPE1/name2 TYPE2/name3 TYPE&lt;#&gt;/name&lt;#&gt;</code> <br>如： <code>kubectl get pod/example-pod1 replicationcontroller/example-rc1</code> </li>
+</ul>
+</li>
+<li>通过一个或多个文件指定资源： <code>-f file1 -f file2 -f file&lt;#&gt;</code> <ul>
+<li>文件使用YAML格式而不是JSON格式。因为YAML对用户更友好，尤其是配置文件<br>如： <code>kubectl get pod -f ./pod.yaml</code> <blockquote>
+<p>注意：命令行指定的 flags 优先级最高，会覆盖默认值和对应的环境变量</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<p>如果需要查看帮助，使用 <code>kubectl help</code> 命令。<br><a name="PJtBW"></a></p>
+<h2 id="操作"><a href="#操作" class="headerlink" title="操作"></a>操作</h2><p>下表包含所有 <code>kubectl</code> 操作的简短描述和通常的语法结构：（TODO: 官方表格命令过期，新命令未添加全，后续补充）</p>
+<table>
+<thead>
+<tr>
+<th align="left">Operation</th>
+<th align="left">Syntax</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>annotate</code></td>
+<td align="left"><code>kubectl annotate (-f FILENAME | TYPE NAME | TYPE/NAME) KEY_1=VAL_1 ... KEY_N=VAL_N [--overwrite] [--all] [--resource-version=version] [flags]</code></td>
+<td align="left">Add or update the annotations of one or more resources.<br>添加或更新一个或多个资源的 annotations。</td>
+</tr>
+<tr>
+<td align="left"><code>api-versions</code></td>
+<td align="left"><code>kubectl api-versions [flags]</code></td>
+<td align="left">List the API versions that are available.<br>查看可用的 API 版本。</td>
+</tr>
+<tr>
+<td align="left"><code>apply</code></td>
+<td align="left"><code>kubectl apply -f FILENAME [flags]</code></td>
+<td align="left">Apply a configuration change to a resource from a file or stdin.<br>通过文件或输入将配置变更应用到资源。</td>
+</tr>
+<tr>
+<td align="left"><code>attach</code></td>
+<td align="left"><code>kubectl attach POD -c CONTAINER [-i] [-t] [flags]</code></td>
+<td align="left">Attach to a running container either to view the output stream or interact with the container (stdin).<br>attach 到运行中的容器，以查看容器输出或和容器交互。类似于 docker 的 attach 操作。</td>
+</tr>
+<tr>
+<td align="left"><code>autoscale</code></td>
+<td align="left"><code>kubectl autoscale (-f FILENAME | TYPE NAME | TYPE/NAME) [--min=MINPODS] --max=MAXPODS [--cpu-percent=CPU] [flags]</code></td>
+<td align="left">Automatically scale the set of pods that are managed by a replication controller.<br>对通过 replication controller 管理的 pods 进行自动的扩缩容。（使pods的负载在指定范围内。）</td>
+</tr>
+<tr>
+<td align="left"><code>cluster-info</code></td>
+<td align="left"><code>kubectl cluster-info [flags]</code></td>
+<td align="left">Display endpoint information about the master and services in the cluster.<br>展示集群 master 和服务（非K8S资源的 Service类型）的端点信息。</td>
+</tr>
+<tr>
+<td align="left"><code>config</code></td>
+<td align="left"><code>kubectl config SUBCOMMAND [flags]</code></td>
+<td align="left">Modifies kubeconfig files. See the individual subcommands for details.<br>修改 kubeconfig 配置内容。查看子命令获取更多信息。</td>
+</tr>
+<tr>
+<td align="left"><code>create</code></td>
+<td align="left"><code>kubectl create -f FILENAME [flags]</code></td>
+<td align="left">Create one or more resources from a file or stdin.<br>通过文件或标准输入创建一个或多个资源。</td>
+</tr>
+<tr>
+<td align="left"><code>delete</code></td>
+<td align="left"><code>kubectl delete (-f FILENAME | TYPE [NAME | /NAME | -l label | --all]) [flags]</code></td>
+<td align="left">Delete resources either from a file, stdin, or specifying label selectors, names, resource selectors, or resources.<br>删除资源。可以通过文件，标准输入或指定 label selectors，names，resource selectors,  resources 的方式。</td>
+</tr>
+<tr>
+<td align="left"><code>describe</code></td>
+<td align="left"><code>kubectl describe (-f FILENAME | TYPE [NAME_PREFIX | /NAME | -l label]) [flags]</code></td>
+<td align="left">Display the detailed state of one or more resources.<br>展示一个或多个资源的详细信息。</td>
+</tr>
+<tr>
+<td align="left"><code>diff</code></td>
+<td align="left"><code>kubectl diff -f FILENAME [flags]</code></td>
+<td align="left">Diff file or stdin against live configuration (<strong>BETA</strong>)<br>对比文件或标准输入与当前配置的区别。</td>
+</tr>
+<tr>
+<td align="left"><code>edit</code></td>
+<td align="left"><code>kubectl edit (-f FILENAME | TYPE NAME | TYPE/NAME) [flags]</code></td>
+<td align="left">Edit and update the definition of one or more resources on the server by using the default editor.<br>通过默认的编辑器修改或更新集群中一个或多个资源</td>
+</tr>
+<tr>
+<td align="left"><code>exec</code></td>
+<td align="left"><code>kubectl exec POD [-c CONTAINER] [-i] [-t] [flags] [-- COMMAND [args...]]</code></td>
+<td align="left">Execute a command against a container in a pod.<br>在 pod 的容器中执行一个命令。和 docker 的 exec 命令相似。</td>
+</tr>
+<tr>
+<td align="left"><code>explain</code></td>
+<td align="left"><code>kubectl explain [--recursive=false] [flags]</code></td>
+<td align="left">Get documentation of various resources. For instance pods, nodes, services, etc.<br>获取各种资源类型的文档，比如，pods，nodes，services 等。</td>
+</tr>
+<tr>
+<td align="left"><code>expose</code></td>
+<td align="left"><code>kubectl expose (-f FILENAME | TYPE NAME | TYPE/NAME) [--port=port] [--protocol=TCP|UDP] [--target-port=number-or-name] [--name=name] [--external-ip=external-ip-of-service] [--type=type] [flags]</code></td>
+<td align="left">Expose a replication controller, service, or pod as a new Kubernetes service.<br><br>将 replication controller（包括 deployment），service，pod暴露为一个新的 kubernetes service。</td>
+</tr>
+<tr>
+<td align="left"><code>get</code></td>
+<td align="left"><code>kubectl get (-f FILENAME | TYPE [NAME | /NAME | -l label]) [--watch] [--sort-by=FIELD] [[-o | --output]=OUTPUT_FORMAT] [flags]</code></td>
+<td align="left">List one or more resources.<br>列出一个或多个资源。</td>
+</tr>
+<tr>
+<td align="left"><code>label</code></td>
+<td align="left"><code>kubectl label (-f FILENAME | TYPE NAME | TYPE/NAME) KEY_1=VAL_1 ... KEY_N=VAL_N [--overwrite] [--all] [--resource-version=version] [flags]</code></td>
+<td align="left">Add or update the labels of one or more resources.<br>添加或更新一个或多个资源的 lables。</td>
+</tr>
+<tr>
+<td align="left"><code>logs</code></td>
+<td align="left"><code>kubectl logs POD [-c CONTAINER] [--follow] [flags]</code></td>
+<td align="left">Print the logs for a container in a pod.<br>输出pod中某个container的日志。和 docker logs 类似。</td>
+</tr>
+<tr>
+<td align="left"><code>patch</code></td>
+<td align="left"><code>kubectl patch (-f FILENAME | TYPE NAME | TYPE/NAME) --patch PATCH [flags]</code></td>
+<td align="left">Update one or more fields of a resource by using the strategic merge patch process.<br>更新资源的一个或多个字段。默认用策略性合并补丁（–type=’strategic’）方式。</td>
+</tr>
+<tr>
+<td align="left"><code>port-forward</code></td>
+<td align="left"><code>kubectl port-forward POD [LOCAL_PORT:]REMOTE_PORT [...[LOCAL_PORT_N:]REMOTE_PORT_N] [flags]</code></td>
+<td align="left">Forward one or more local ports to a pod.<br>转发一个或多个本地端口到pod。</td>
+</tr>
+<tr>
+<td align="left"><code>proxy</code></td>
+<td align="left"><code>kubectl proxy [--port=PORT] [--www=static-dir] [--www-prefix=prefix] [--api-prefix=prefix] [flags]</code></td>
+<td align="left">Run a proxy to the Kubernetes API server.<br>启动一个到 Kubernetes API server 的代理。</td>
+</tr>
+<tr>
+<td align="left"><code>replace</code></td>
+<td align="left"><code>kubectl replace -f FILENAME</code></td>
+<td align="left">Replace a resource from a file or stdin.<br>从文件或标准输入替换一个资源。</td>
+</tr>
+<tr>
+<td align="left"><code>rolling-update</code></td>
+<td align="left"><code>kubectl rolling-update OLD_CONTROLLER_NAME ([NEW_CONTROLLER_NAME] --image=NEW_CONTAINER_IMAGE | -f NEW_CONTROLLER_SPEC) [flags]</code></td>
+<td align="left">Perform a rolling update by gradually replacing the specified replication controller and its pods.<br>通过逐步替换 replication controller 和它的 pods 来实现一个滚动更新。(废弃了，用 rollout替代)。</td>
+</tr>
+<tr>
+<td align="left"><code>run</code></td>
+<td align="left"><code>kubectl run NAME --image=image [--env=&quot;key=value&quot;] [--port=port] [--replicas=replicas] [--dry-run=bool] [--overrides=inline-json] [flags]</code></td>
+<td align="left">Run a specified image on the cluster.<br>在集群上运行特定的镜像。</td>
+</tr>
+<tr>
+<td align="left"><code>scale</code></td>
+<td align="left"><code>kubectl scale (-f FILENAME | TYPE NAME | TYPE/NAME) --replicas=COUNT [--resource-version=version] [--current-replicas=count] [flags]</code></td>
+<td align="left">Update the size of the specified replication controller.<br>更新指定 replication controller 的副本数量。</td>
+</tr>
+<tr>
+<td align="left"><code>stop</code></td>
+<td align="left"><code>kubectl stop</code></td>
+<td align="left">Deprecated: Instead, see <code>kubectl delete</code>.<br>废弃，使用 <code>kubectl delete</code>  替代。</td>
+</tr>
+<tr>
+<td align="left"><code>version</code></td>
+<td align="left"><code>kubectl version [--client] [flags]</code></td>
+<td align="left">Display the Kubernetes version running on the client and server.<br>展示 Kubernetes 服务集群和本地客户端的版本。</td>
+</tr>
+</tbody></table>
+<p>提示：关于命令操作的更多信息参见<a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands" rel="external nofollow noopener noreferrer" target="_blank">kubectl参考文档</a> 。</p>
+<p><a name="xVsVC"></a></p>
+<h2 id="资源类型"><a href="#资源类型" class="headerlink" title="资源类型"></a>资源类型</h2><p>The following table includes a list of all the supported resource types and their abbreviated aliases.<br>(This output can be retrieved from <code>kubectl api-resources</code>, and is accurate as of Kubernetes 1.13.3.)</p>
+<table>
+<thead>
+<tr>
+<th align="left">Resource Name</th>
+<th align="left">Short Names</th>
+<th align="left">API Group</th>
+<th align="left">Namespaced</th>
+<th align="left">Resource Kind</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>componentstatuses</code></td>
+<td align="left"><code>cs</code></td>
+<td align="left"></td>
+<td align="left">false</td>
+<td align="left">ComponentStatus</td>
+</tr>
+<tr>
+<td align="left"><code>configmaps</code></td>
+<td align="left"><code>cm</code></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">ConfigMap</td>
+</tr>
+<tr>
+<td align="left"><code>endpoints</code></td>
+<td align="left"><code>ep</code></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">Endpoints</td>
+</tr>
+<tr>
+<td align="left"><code>limitranges</code></td>
+<td align="left"><code>limits</code></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">LimitRange</td>
+</tr>
+<tr>
+<td align="left"><code>namespaces</code></td>
+<td align="left"><code>ns</code></td>
+<td align="left"></td>
+<td align="left">false</td>
+<td align="left">Namespace</td>
+</tr>
+<tr>
+<td align="left"><code>nodes</code></td>
+<td align="left"><code>no</code></td>
+<td align="left"></td>
+<td align="left">false</td>
+<td align="left">Node</td>
+</tr>
+<tr>
+<td align="left"><code>persistentvolumeclaims</code></td>
+<td align="left"><code>pvc</code></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">PersistentVolumeClaim</td>
+</tr>
+<tr>
+<td align="left"><code>persistentvolumes</code></td>
+<td align="left"><code>pv</code></td>
+<td align="left"></td>
+<td align="left">false</td>
+<td align="left">PersistentVolume</td>
+</tr>
+<tr>
+<td align="left"><code>pods</code></td>
+<td align="left"><code>po</code></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">Pod</td>
+</tr>
+<tr>
+<td align="left"><code>podtemplates</code></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">PodTemplate</td>
+</tr>
+<tr>
+<td align="left"><code>replicationcontrollers</code></td>
+<td align="left"><code>rc</code></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">ReplicationController</td>
+</tr>
+<tr>
+<td align="left"><code>resourcequotas</code></td>
+<td align="left"><code>quota</code></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">ResourceQuota</td>
+</tr>
+<tr>
+<td align="left"><code>secrets</code></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">Secret</td>
+</tr>
+<tr>
+<td align="left"><code>serviceaccounts</code></td>
+<td align="left"><code>sa</code></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">ServiceAccount</td>
+</tr>
+<tr>
+<td align="left"><code>services</code></td>
+<td align="left"><code>svc</code></td>
+<td align="left"></td>
+<td align="left">true</td>
+<td align="left">Service</td>
+</tr>
+<tr>
+<td align="left"><code>mutatingwebhookconfigurations</code></td>
+<td align="left"></td>
+<td align="left">admissionregistration.k8s.io</td>
+<td align="left">false</td>
+<td align="left">MutatingWebhookConfiguration</td>
+</tr>
+<tr>
+<td align="left"><code>validatingwebhookconfigurations</code></td>
+<td align="left"></td>
+<td align="left">admissionregistration.k8s.io</td>
+<td align="left">false</td>
+<td align="left">ValidatingWebhookConfiguration</td>
+</tr>
+<tr>
+<td align="left"><code>customresourcedefinitions</code></td>
+<td align="left"><code>crd</code>, <code>crds</code></td>
+<td align="left">apiextensions.k8s.io</td>
+<td align="left">false</td>
+<td align="left">CustomResourceDefinition</td>
+</tr>
+<tr>
+<td align="left"><code>apiservices</code></td>
+<td align="left"></td>
+<td align="left">apiregistration.k8s.io</td>
+<td align="left">false</td>
+<td align="left">APIService</td>
+</tr>
+<tr>
+<td align="left"><code>controllerrevisions</code></td>
+<td align="left"></td>
+<td align="left">apps</td>
+<td align="left">true</td>
+<td align="left">ControllerRevision</td>
+</tr>
+<tr>
+<td align="left"><code>daemonsets</code></td>
+<td align="left"><code>ds</code></td>
+<td align="left">apps</td>
+<td align="left">true</td>
+<td align="left">DaemonSet</td>
+</tr>
+<tr>
+<td align="left"><code>deployments</code></td>
+<td align="left"><code>deploy</code></td>
+<td align="left">apps</td>
+<td align="left">true</td>
+<td align="left">Deployment</td>
+</tr>
+<tr>
+<td align="left"><code>replicasets</code></td>
+<td align="left"><code>rs</code></td>
+<td align="left">apps</td>
+<td align="left">true</td>
+<td align="left">ReplicaSet</td>
+</tr>
+<tr>
+<td align="left"><code>statefulsets</code></td>
+<td align="left"><code>sts</code></td>
+<td align="left">apps</td>
+<td align="left">true</td>
+<td align="left">StatefulSet</td>
+</tr>
+<tr>
+<td align="left"><code>tokenreviews</code></td>
+<td align="left"></td>
+<td align="left">authentication.k8s.io</td>
+<td align="left">false</td>
+<td align="left">TokenReview</td>
+</tr>
+<tr>
+<td align="left"><code>localsubjectaccessreviews</code></td>
+<td align="left"></td>
+<td align="left">authorization.k8s.io</td>
+<td align="left">true</td>
+<td align="left">LocalSubjectAccessReview</td>
+</tr>
+<tr>
+<td align="left"><code>selfsubjectaccessreviews</code></td>
+<td align="left"></td>
+<td align="left">authorization.k8s.io</td>
+<td align="left">false</td>
+<td align="left">SelfSubjectAccessReview</td>
+</tr>
+<tr>
+<td align="left"><code>selfsubjectrulesreviews</code></td>
+<td align="left"></td>
+<td align="left">authorization.k8s.io</td>
+<td align="left">false</td>
+<td align="left">SelfSubjectRulesReview</td>
+</tr>
+<tr>
+<td align="left"><code>subjectaccessreviews</code></td>
+<td align="left"></td>
+<td align="left">authorization.k8s.io</td>
+<td align="left">false</td>
+<td align="left">SubjectAccessReview</td>
+</tr>
+<tr>
+<td align="left"><code>horizontalpodautoscalers</code></td>
+<td align="left"><code>hpa</code></td>
+<td align="left">autoscaling</td>
+<td align="left">true</td>
+<td align="left">HorizontalPodAutoscaler</td>
+</tr>
+<tr>
+<td align="left"><code>cronjobs</code></td>
+<td align="left"><code>cj</code></td>
+<td align="left">batch</td>
+<td align="left">true</td>
+<td align="left">CronJob</td>
+</tr>
+<tr>
+<td align="left"><code>jobs</code></td>
+<td align="left"></td>
+<td align="left">batch</td>
+<td align="left">true</td>
+<td align="left">Job</td>
+</tr>
+<tr>
+<td align="left"><code>certificatesigningrequests</code></td>
+<td align="left"><code>csr</code></td>
+<td align="left">certificates.k8s.io</td>
+<td align="left">false</td>
+<td align="left">CertificateSigningRequest</td>
+</tr>
+<tr>
+<td align="left"><code>leases</code></td>
+<td align="left"></td>
+<td align="left">coordination.k8s.io</td>
+<td align="left">true</td>
+<td align="left">Lease</td>
+</tr>
+<tr>
+<td align="left"><code>events</code></td>
+<td align="left"><code>ev</code></td>
+<td align="left">events.k8s.io</td>
+<td align="left">true</td>
+<td align="left">Event</td>
+</tr>
+<tr>
+<td align="left"><code>ingresses</code></td>
+<td align="left"><code>ing</code></td>
+<td align="left">extensions</td>
+<td align="left">true</td>
+<td align="left">Ingress</td>
+</tr>
+<tr>
+<td align="left"><code>networkpolicies</code></td>
+<td align="left"><code>netpol</code></td>
+<td align="left">networking.k8s.io</td>
+<td align="left">true</td>
+<td align="left">NetworkPolicy</td>
+</tr>
+<tr>
+<td align="left"><code>poddisruptionbudgets</code></td>
+<td align="left"><code>pdb</code></td>
+<td align="left">policy</td>
+<td align="left">true</td>
+<td align="left">PodDisruptionBudget</td>
+</tr>
+<tr>
+<td align="left"><code>podsecuritypolicies</code></td>
+<td align="left"><code>psp</code></td>
+<td align="left">policy</td>
+<td align="left">false</td>
+<td align="left">PodSecurityPolicy</td>
+</tr>
+<tr>
+<td align="left"><code>clusterrolebindings</code></td>
+<td align="left"></td>
+<td align="left">rbac.authorization.k8s.io</td>
+<td align="left">false</td>
+<td align="left">ClusterRoleBinding</td>
+</tr>
+<tr>
+<td align="left"><code>clusterroles</code></td>
+<td align="left"></td>
+<td align="left">rbac.authorization.k8s.io</td>
+<td align="left">false</td>
+<td align="left">ClusterRole</td>
+</tr>
+<tr>
+<td align="left"><code>rolebindings</code></td>
+<td align="left"></td>
+<td align="left">rbac.authorization.k8s.io</td>
+<td align="left">true</td>
+<td align="left">RoleBinding</td>
+</tr>
+<tr>
+<td align="left"><code>roles</code></td>
+<td align="left"></td>
+<td align="left">rbac.authorization.k8s.io</td>
+<td align="left">true</td>
+<td align="left">Role</td>
+</tr>
+<tr>
+<td align="left"><code>priorityclasses</code></td>
+<td align="left"><code>pc</code></td>
+<td align="left">scheduling.k8s.io</td>
+<td align="left">false</td>
+<td align="left">PriorityClass</td>
+</tr>
+<tr>
+<td align="left"><code>storageclasses</code></td>
+<td align="left"><code>sc</code></td>
+<td align="left">storage.k8s.io</td>
+<td align="left">false</td>
+<td align="left">StorageClass</td>
+</tr>
+<tr>
+<td align="left"><code>volumeattachments</code></td>
+<td align="left"></td>
+<td align="left">storage.k8s.io</td>
+<td align="left">false</td>
+<td align="left">VolumeAttachment</td>
+</tr>
+</tbody></table>
+<p><a name="SqhQo"></a></p>
+<h2 id="输出选项"><a href="#输出选项" class="headerlink" title="输出选项"></a>输出选项</h2><p>Use the following sections for information about how you can format or sort the output of certain commands. For details about which commands support the various output options, see the <a href="https://kubernetes.io/docs/user-guide/kubectl/" rel="external nofollow noopener noreferrer" target="_blank">kubectl</a> reference documentation.<br><a name="formatting-output"></a></p>
+<h3 id="Formatting-output"><a href="#Formatting-output" class="headerlink" title="Formatting output"></a>Formatting output</h3><p>The default output format for all <code>kubectl</code> commands is the human readable plain-text format. To output details to your terminal window in a specific format, you can add either the <code>-o</code>or <code>--output</code> flags to a supported <code>kubectl</code> command.<br><a name="syntax-1"></a></p>
+<h4 id="Syntax"><a href="#Syntax" class="headerlink" title="Syntax"></a>Syntax</h4><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">kubectl</span> <span class="selector-attr">[command]</span> <span class="selector-attr">[TYPE]</span> <span class="selector-attr">[NAME]</span> <span class="selector-tag">-o</span> &lt;<span class="selector-tag">output_format</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>Depending on the <code>kubectl</code> operation, the following output formats are supported:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Output format</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>-o custom-columns=&lt;spec&gt;</code></td>
+<td align="left">Print a table using a comma separated list of <a href="https://kubernetes.io/docs/reference/kubectl/overview/#custom-columns" rel="external nofollow noopener noreferrer" target="_blank">custom columns</a>.</td>
+</tr>
+<tr>
+<td align="left"><code>-o custom-columns-file=&lt;filename&gt;</code></td>
+<td align="left">Print a table using the <a href="https://kubernetes.io/docs/reference/kubectl/overview/#custom-columns" rel="external nofollow noopener noreferrer" target="_blank">custom columns</a> template in the <code>&lt;filename&gt;</code> file.</td>
+</tr>
+<tr>
+<td align="left"><code>-o json</code></td>
+<td align="left">Output a JSON formatted API object.</td>
+</tr>
+<tr>
+<td align="left"><code>-o jsonpath=&lt;template&gt;</code></td>
+<td align="left">Print the fields defined in a <a href="https://kubernetes.io/docs/reference/kubectl/jsonpath/" rel="external nofollow noopener noreferrer" target="_blank">jsonpath</a> expression.</td>
+</tr>
+<tr>
+<td align="left"><code>-o jsonpath-file=&lt;filename&gt;</code></td>
+<td align="left">Print the fields defined by the <a href="https://kubernetes.io/docs/reference/kubectl/jsonpath/" rel="external nofollow noopener noreferrer" target="_blank">jsonpath</a> expression in the <code>&lt;filename&gt;</code> file.</td>
+</tr>
+<tr>
+<td align="left"><code>-o name</code></td>
+<td align="left">Print only the resource name and nothing else.</td>
+</tr>
+<tr>
+<td align="left"><code>-o wide</code></td>
+<td align="left">Output in the plain-text format with any additional information. For pods, the node name is included.</td>
+</tr>
+<tr>
+<td align="left"><code>-o yaml</code></td>
+<td align="left">Output a YAML formatted API object.</td>
+</tr>
+</tbody></table>
+<p><a name="example"></a></p>
+<h5 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h5><p>In this example, the following command outputs the details for a single pod as a YAML formatted object:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="builtin-name">get</span> pod web-pod-13je7 -o yaml</span><br></pre></td></tr></table></figure>
+
+<p>Remember: See the <a href="https://kubernetes.io/docs/user-guide/kubectl/" rel="external nofollow noopener noreferrer" target="_blank">kubectl</a> reference documentation for details about which output format is supported by each command.<br><a name="custom-columns"></a></p>
+<h4 id="Custom-columns"><a href="#Custom-columns" class="headerlink" title="Custom columns"></a>Custom columns</h4><p>To define custom columns and output only the details that you want into a table, you can use the <code>custom-columns</code> option. You can choose to define the custom columns inline or use a template file: <code>-o custom-columns=&lt;spec&gt;</code> or <code>-o custom-columns-file=&lt;filename&gt;</code>.<br><a name="examples"></a></p>
+<h5 id="Examples"><a href="#Examples" class="headerlink" title="Examples"></a>Examples</h5><p>Inline:</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">get</span> pods &lt;pod-<span class="type">name</span>&gt; -o custom-<span class="keyword">columns</span>=<span class="type">NAME</span>:.metadata.name,RSRC:.metadata.resourceVersion</span><br></pre></td></tr></table></figure>
+
+<p>Template file:</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">get</span> pods &lt;pod-<span class="type">name</span>&gt; -o custom-<span class="keyword">columns</span>-file=<span class="keyword">template</span>.txt</span><br></pre></td></tr></table></figure>
+
+<p>where the <code>template.txt</code> file contains:</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">NAME</span>          <span class="selector-tag">RSRC</span></span><br><span class="line"><span class="selector-tag">metadata</span><span class="selector-class">.name</span> <span class="selector-tag">metadata</span><span class="selector-class">.resourceVersion</span></span><br></pre></td></tr></table></figure>
+
+<p>The result of running either command is:</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME           RSRC</span><br><span class="line">submit-queue   <span class="number">610995</span></span><br></pre></td></tr></table></figure>
+
+<p><a name="server-side-columns"></a></p>
+<h4 id="Server-side-columns"><a href="#Server-side-columns" class="headerlink" title="Server-side columns"></a>Server-side columns</h4><p><code>kubectl</code> supports receiving specific column information from the server about objects. This means that for any given resource, the server will return columns and rows relevant to that resource, for the client to print. This allows for consistent human-readable output across clients used against the same cluster, by having the server encapsulate the details of printing.<br>This feature is enabled by default in <code>kubectl</code> 1.11 and higher. To disable it, add the <code>--server-print=false</code> flag to the <code>kubectl get</code> command.<br><a name="examples-1"></a></p>
+<h5 id="Examples-1"><a href="#Examples-1" class="headerlink" title="Examples"></a>Examples</h5><p>To print information about the status of a pod, use a command like the following:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="builtin-name">get</span> pods &lt;pod-name&gt; <span class="attribute">--server-print</span>=<span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>Output looks like this:</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME       READY     STATUS              RESTARTS   AGE</span><br><span class="line">pod-name   <span class="number">1</span>/<span class="number">1</span>       Running             <span class="number">0</span>          <span class="number">1</span>m</span><br></pre></td></tr></table></figure>
+
+<p><a name="sorting-list-objects"></a></p>
+<h3 id="Sorting-list-objects"><a href="#Sorting-list-objects" class="headerlink" title="Sorting list objects"></a>Sorting list objects</h3><p>To output objects to a sorted list in your terminal window, you can add the <code>--sort-by</code> flag to a supported <code>kubectl</code> command. Sort your objects by specifying any numeric or string field with the <code>--sort-by</code> flag. To specify a field, use a <a href="https://kubernetes.io/docs/reference/kubectl/jsonpath/" rel="external nofollow noopener noreferrer" target="_blank">jsonpath</a> expression.<br><a name="syntax-2"></a></p>
+<h4 id="Syntax-1"><a href="#Syntax-1" class="headerlink" title="Syntax"></a>Syntax</h4><figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="comment">[command]</span> <span class="comment">[TYPE]</span> <span class="comment">[NAME]</span> --sort-by=&lt;jsonpath_exp&gt;</span><br></pre></td></tr></table></figure>
+
+<p><a name="example-1"></a></p>
+<h5 id="Example-1"><a href="#Example-1" class="headerlink" title="Example"></a>Example</h5><p>To print a list of pods sorted by name, you run:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="builtin-name">get</span> pods <span class="attribute">--sort-by</span>=.metadata.name</span><br></pre></td></tr></table></figure>
+
+<p><a name="3Lgze"></a></p>
+<h2 id="示例：常用操作"><a href="#示例：常用操作" class="headerlink" title="示例：常用操作"></a>示例：常用操作</h2><p>Use the following set of examples to help you familiarize yourself with running the commonly used <code>kubectl</code> operations:<br><code>kubectl apply</code> - Apply or Update a resource from a file or stdin.</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Create a service using the definition in example-service.yaml.</span></span><br><span class="line"><span class="attr">kubectl</span> <span class="string">apply -f example-service.yaml</span></span><br><span class="line"><span class="comment"># Create a replication controller using the definition in example-controller.yaml.</span></span><br><span class="line"><span class="attr">kubectl</span> <span class="string">apply -f example-controller.yaml</span></span><br><span class="line"><span class="comment"># Create the objects that are defined in any .yaml, .yml, or .json file within the &lt;directory&gt; directory.</span></span><br><span class="line"><span class="attr">kubectl</span> <span class="string">apply -f &lt;directory&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>kubectl get</code> - List one or more resources.</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># List <span class="keyword">all</span> pods <span class="keyword">in</span> plain-<span class="type">text</span> output <span class="keyword">format</span>.</span><br><span class="line">kubectl <span class="keyword">get</span> pods</span><br><span class="line"># List <span class="keyword">all</span> pods <span class="keyword">in</span> plain-<span class="type">text</span> output <span class="keyword">format</span> <span class="keyword">and</span> <span class="keyword">include</span> additional information (such <span class="keyword">as</span> node <span class="type">name</span>).</span><br><span class="line">kubectl <span class="keyword">get</span> pods -o wide</span><br><span class="line"># List the <span class="keyword">replication</span> controller <span class="keyword">with</span> the specified <span class="type">name</span> <span class="keyword">in</span> plain-<span class="type">text</span> output <span class="keyword">format</span>. Tip: You can shorten <span class="keyword">and</span> replace the <span class="string">'replicationcontroller'</span> resource <span class="keyword">type</span> <span class="keyword">with</span> the <span class="keyword">alias</span> <span class="string">'rc'</span>.</span><br><span class="line">kubectl <span class="keyword">get</span> replicationcontroller &lt;rc-<span class="type">name</span>&gt;</span><br><span class="line"># List <span class="keyword">all</span> <span class="keyword">replication</span> controllers <span class="keyword">and</span> services together <span class="keyword">in</span> plain-<span class="type">text</span> output <span class="keyword">format</span>.</span><br><span class="line">kubectl <span class="keyword">get</span> rc,services</span><br><span class="line"># List <span class="keyword">all</span> daemon sets, including uninitialized ones, <span class="keyword">in</span> plain-<span class="type">text</span> output <span class="keyword">format</span>.</span><br><span class="line">kubectl <span class="keyword">get</span> ds <span class="comment">--include-uninitialized</span></span><br><span class="line"># List <span class="keyword">all</span> pods running <span class="keyword">on</span> node server01</span><br><span class="line">kubectl <span class="keyword">get</span> pods <span class="comment">--field-selector=spec.nodeName=server01</span></span><br></pre></td></tr></table></figure>
+
+<p><code>kubectl describe</code> - Display detailed state of one or more resources, including the uninitialized ones by default.</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Display the details of the node with name &lt;node-name&gt;.</span></span><br><span class="line">kubectl <span class="keyword">describe</span> nodes &lt;node-<span class="keyword">name</span>&gt;</span><br><span class="line"><span class="comment"># Display the details of the pod with name &lt;pod-name&gt;.</span></span><br><span class="line">kubectl <span class="keyword">describe</span> pods/&lt;pod-<span class="keyword">name</span>&gt;</span><br><span class="line"><span class="comment"># Display the details of all the pods that are managed by the replication controller named &lt;rc-name&gt;.</span></span><br><span class="line"><span class="comment"># Remember: Any pods that are created by the replication controller get prefixed with the name of the replication controller.</span></span><br><span class="line">kubectl <span class="keyword">describe</span> pods &lt;rc-<span class="keyword">name</span>&gt;</span><br><span class="line"><span class="comment"># Describe all pods, not including uninitialized ones</span></span><br><span class="line">kubectl <span class="keyword">describe</span> pods <span class="comment">--include-uninitialized=false</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>Note:</strong> The <code>kubectl get</code> command is usually used for retrieving one or more resources of the same resource type. It features a rich set of flags that allows you to customize the output format using the <code>-o</code> or <code>--output</code> flag, for example. You can specify the <code>-w</code> or <code>--watch</code> flag to start watching updates to a particular object. The <code>kubectl describe</code> command is more focused on describing the many related aspects of a specified resource. It may invoke several API calls to the API server to build a view for the user. For example, the <code>kubectl describe node</code> command retrieves not only the information about the node, but also a summary of the pods running on it, the events generated for the node etc.</p>
+</blockquote>
+<p><code>kubectl delete</code> - Delete resources either from a file, stdin, or specifying label selectors, names, resource selectors, or resources.</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">Delete</span> a pod <span class="keyword">using</span> the <span class="keyword">type</span> <span class="keyword">and</span> <span class="type">name</span> specified <span class="keyword">in</span> the pod.yaml file.</span><br><span class="line">kubectl <span class="keyword">delete</span> -f pod.yaml</span><br><span class="line"># <span class="keyword">Delete</span> <span class="keyword">all</span> the pods <span class="keyword">and</span> services that have the label <span class="type">name</span>=&lt;label-<span class="type">name</span>&gt;.</span><br><span class="line">kubectl <span class="keyword">delete</span> pods,services -l <span class="type">name</span>=&lt;label-<span class="type">name</span>&gt;</span><br><span class="line"># <span class="keyword">Delete</span> <span class="keyword">all</span> the pods <span class="keyword">and</span> services that have the label <span class="type">name</span>=&lt;label-<span class="type">name</span>&gt;, including uninitialized ones.</span><br><span class="line">kubectl <span class="keyword">delete</span> pods,services -l <span class="type">name</span>=&lt;label-<span class="type">name</span>&gt; <span class="comment">--include-uninitialized</span></span><br><span class="line"># <span class="keyword">Delete</span> <span class="keyword">all</span> pods, including uninitialized ones.</span><br><span class="line">kubectl <span class="keyword">delete</span> pods <span class="comment">--all</span></span><br></pre></td></tr></table></figure>
+
+<p><code>kubectl exec</code> - Execute a command against a container in a pod.</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">Get</span> output <span class="keyword">from</span> running <span class="string">'date'</span> <span class="keyword">from</span> pod &lt;pod-<span class="type">name</span>&gt;. <span class="keyword">By</span> <span class="keyword">default</span>, output <span class="keyword">is</span> <span class="keyword">from</span> the first container.</span><br><span class="line">kubectl exec &lt;pod-<span class="type">name</span>&gt; <span class="type">date</span></span><br><span class="line"># <span class="keyword">Get</span> output <span class="keyword">from</span> running <span class="string">'date'</span> <span class="keyword">in</span> container &lt;container-<span class="type">name</span>&gt; <span class="keyword">of</span> pod &lt;pod-<span class="type">name</span>&gt;.</span><br><span class="line">kubectl exec &lt;pod-<span class="type">name</span>&gt; -c &lt;container-<span class="type">name</span>&gt; <span class="type">date</span></span><br><span class="line"># <span class="keyword">Get</span> an interactive TTY <span class="keyword">and</span> run /bin/bash <span class="keyword">from</span> pod &lt;pod-<span class="type">name</span>&gt;. <span class="keyword">By</span> <span class="keyword">default</span>, output <span class="keyword">is</span> <span class="keyword">from</span> the first container.</span><br><span class="line">kubectl exec -ti &lt;pod-<span class="type">name</span>&gt; /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p><code>kubectl logs</code> - Print the logs for a container in a pod.</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">Return</span> a <span class="keyword">snapshot</span> <span class="keyword">of</span> the logs <span class="keyword">from</span> pod &lt;pod-<span class="type">name</span>&gt;.</span><br><span class="line">kubectl logs &lt;pod-<span class="type">name</span>&gt;</span><br><span class="line"># <span class="keyword">Start</span> streaming the logs <span class="keyword">from</span> pod &lt;pod-<span class="type">name</span>&gt;. This <span class="keyword">is</span> <span class="keyword">similar</span> <span class="keyword">to</span> the <span class="string">'tail -f'</span> Linux command.</span><br><span class="line">kubectl logs -f &lt;pod-<span class="type">name</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p><a name="s7IcX"></a></p>
+<h2 id="示例：创建和使用-plugins"><a href="#示例：创建和使用-plugins" class="headerlink" title="示例：创建和使用 plugins"></a>示例：创建和使用 plugins</h2><p>Use the following set of examples to help you familiarize yourself with writing and using <code>kubectl</code> plugins:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># create a simple plugin in any language and name the resulting executable file</span></span><br><span class="line"><span class="comment"># so that it begins with the prefix "kubectl-"</span></span><br><span class="line">cat ./kubectl-hello</span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># this plugin prints the words "hello world"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"hello world"</span></span><br><span class="line"><span class="comment"># with our plugin written, let's make it executable</span></span><br><span class="line">sudo chmod +x ./kubectl-hello</span><br><span class="line"><span class="comment"># and move it to a location in our PATH</span></span><br><span class="line">sudo mv ./kubectl-hello /usr/<span class="built_in">local</span>/bin</span><br><span class="line"><span class="comment"># we have now created and "installed" a kubectl plugin.</span></span><br><span class="line"><span class="comment"># we can begin using our plugin by invoking it from kubectl as if it were a regular command</span></span><br><span class="line">kubectl hello</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">hello world</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># we can "uninstall" a plugin, by simply removing it from our PATH</span></span><br><span class="line">sudo rm <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>kubectl-hello</span><br></pre></td></tr></table></figure>
+
+<p>In order to view all of the plugins that are available to <code>kubectl</code>, we can use the <code>kubectl plugin list</code> subcommand:</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="keyword">plugin</span> <span class="keyword">list</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">The following kubectl-compatible plugins are <span class="string">available:</span></span><br><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>kubectl-hello</span><br><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>kubectl-foo</span><br><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>kubectl-bar</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># this command can also warn us about plugins that are</span></span><br><span class="line"><span class="comment"># not executable, or that are overshadowed by other</span></span><br><span class="line"><span class="comment"># plugins, for example</span></span><br><span class="line">sudo chmod -x /usr/<span class="keyword">local</span>/bin/kubectl-foo</span><br><span class="line">kubectl plugin <span class="built_in">list</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">The following kubectl-compatible plugins are <span class="string">available:</span></span><br><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>kubectl-hello</span><br><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>kubectl-foo</span><br><span class="line">  - <span class="string">warning:</span> <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>kubectl-foo identified <span class="keyword">as</span> a plugin, but it is not executable</span><br><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>kubectl-bar</span><br><span class="line"><span class="string">error:</span> one plugin warning was found</span><br></pre></td></tr></table></figure>
+
+<p>We can think of plugins as a means to build more complex functionality on top of the existing kubectl commands:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cat ./kubectl-whoami</span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"><span class="comment"># this plugin makes use of the `kubectl config` command in order to output</span></span><br><span class="line"><span class="comment"># information about the current user, based on the currently selected context</span></span><br><span class="line">kubectl<span class="built_in"> config </span>view <span class="attribute">--template</span>=<span class="string">'&#123;&#123; range .contexts &#125;&#125;&#123;&#123; if eq .name "'</span>$(kubectl<span class="built_in"> config </span>current-context)<span class="string">'" &#125;&#125;Current user: &#123;&#123; .context.user &#125;&#125;&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;'</span></span><br></pre></td></tr></table></figure>
+
+<p>Running the above plugin gives us an output containing the user for the currently selected context in our KUBECONFIG file:</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># make the file executable</span><br><span class="line">sudo chmod +x ./kubectl-whoami</span><br><span class="line"># <span class="keyword">and</span> <span class="keyword">move</span> it <span class="keyword">into</span> our <span class="type">PATH</span></span><br><span class="line">sudo mv ./kubectl-whoami /usr/<span class="keyword">local</span>/bin</span><br><span class="line">kubectl whoami</span><br><span class="line"><span class="keyword">Current</span> <span class="keyword">user</span>: plugins-<span class="keyword">user</span></span><br></pre></td></tr></table></figure>
+
+<p>To find out more about plugins, take a look at the <a href="https://github.com/kubernetes/sample-cli-plugin" rel="external nofollow noopener noreferrer" target="_blank">example cli plugin</a>.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">➜ kubectl --<span class="built_in">help</span>                                                                                                        </span><br><span class="line">kubectl controls the Kubernetes cluster manager.                                                                               </span><br><span class="line">                                                                                                                               </span><br><span class="line"> Find more information at: https://kubernetes.io/docs/reference/kubectl/overview/                                              </span><br><span class="line">                                                                                                                               </span><br><span class="line">Basic Commands (Beginner):                                                                                                     </span><br><span class="line">  create         Create a resource from a file or from stdin.                                                                  </span><br><span class="line">  expose         Take a replication controller, service, deployment or pod and expose it as a new Kubernetes Service           </span><br><span class="line">  run            Run a particular image on the cluster                                                                         </span><br><span class="line">  <span class="built_in">set</span>            Set specific features on objects                                                                              </span><br><span class="line">                                                                                                                               </span><br><span class="line">Basic Commands (Intermediate):                                                                                                 </span><br><span class="line">  explain        Documentation of resources                                                                                    </span><br><span class="line">  get            Display one or many resources                                                                                 </span><br><span class="line">  edit           Edit a resource on the server                                                                                 </span><br><span class="line">  delete         Delete resources by filenames, stdin, resources and names, or by resources and label selector                 </span><br><span class="line">                                                                                                                               </span><br><span class="line">Deploy Commands:                                                                                                               </span><br><span class="line">  rollout        Manage the rollout of a resource                                                                              </span><br><span class="line">  scale          Set a new size <span class="keyword">for</span> a Deployment, ReplicaSet, Replication Controller, or Job                                   </span><br><span class="line">  autoscale      Auto-scale a Deployment, ReplicaSet, or ReplicationController                                                 </span><br><span class="line">                                                                                                                               </span><br><span class="line">Cluster Management Commands:                                                                                                   </span><br><span class="line">  certificate    Modify certificate resources.                                                                                 </span><br><span class="line">  cluster-info   Display cluster info                                                                                          </span><br><span class="line">  top            Display Resource (CPU/Memory/Storage) usage.                                                                  </span><br><span class="line">  cordon         Mark node as unschedulable                                                                                    </span><br><span class="line">  uncordon       Mark node as schedulable                                                                                      </span><br><span class="line">  drain          Drain node <span class="keyword">in</span> preparation <span class="keyword">for</span> maintenance                                                                     </span><br><span class="line">  taint          Update the taints on one or more nodes                                                                        </span><br><span class="line">                                                                                                                               </span><br><span class="line">Troubleshooting and Debugging Commands:                                                                                        </span><br><span class="line">  describe       Show details of a specific resource or group of resources                                                     </span><br><span class="line">  logs           Print the logs <span class="keyword">for</span> a container <span class="keyword">in</span> a pod                                                                       </span><br><span class="line">  attach         Attach to a running container                                                                                 </span><br><span class="line">  <span class="built_in">exec</span>           Execute a <span class="built_in">command</span> <span class="keyword">in</span> a container                                                                              </span><br><span class="line">  port-forward   Forward one or more <span class="built_in">local</span> ports to a pod                                                                      </span><br><span class="line">  proxy          Run a proxy to the Kubernetes API server                                                                      </span><br><span class="line">  cp             Copy files and directories to and from containers.                                                            </span><br><span class="line">  auth           Inspect authorization                                                                                         </span><br><span class="line">                                                                                                                               </span><br><span class="line">Advanced Commands:                                                                                                             </span><br><span class="line">  diff           Diff live version against would-be applied version                                                            </span><br><span class="line">  apply          Apply a configuration to a resource by filename or stdin                                                      </span><br><span class="line">  patch          Update field(s) of a resource using strategic merge patch                                                     </span><br><span class="line">  replace        Replace a resource by filename or stdin                                                                       </span><br><span class="line">  <span class="built_in">wait</span>           Experimental: Wait <span class="keyword">for</span> a specific condition on one or many resources.                                         </span><br><span class="line">  convert        Convert config files between different API versions                                                           </span><br><span class="line">  kustomize      Build a kustomization target from a directory or a remote url.                                                </span><br><span class="line">                                                                                                                               </span><br><span class="line">Settings Commands:                                                                                                             </span><br><span class="line">  label          Update the labels on a resource                                                                               </span><br><span class="line">  annotate       Update the annotations on a resource                                                                          </span><br><span class="line">  completion     Output shell completion code <span class="keyword">for</span> the specified shell (bash or zsh)                                            </span><br><span class="line">                                                                                                                               </span><br><span class="line">Other Commands:                                                                                                                </span><br><span class="line">  api-resources  Print the supported API resources on the server                                                               </span><br><span class="line">  api-versions   Print the supported API versions on the server, <span class="keyword">in</span> the form of <span class="string">"group/version"</span>                                </span><br><span class="line">  config         Modify kubeconfig files                                                                                       </span><br><span class="line">  plugin         Provides utilities <span class="keyword">for</span> interacting with plugins.                                                              </span><br><span class="line">  version        Print the client and server version information                                                               </span><br><span class="line">                                                                                                                               </span><br><span class="line">Usage:                                                                                                                         </span><br><span class="line">  kubectl [flags] [options]                                                                                                    </span><br><span class="line">                                                                                                                               </span><br><span class="line">Use <span class="string">"kubectl &lt;command&gt; --help"</span> <span class="keyword">for</span> more information about a given <span class="built_in">command</span>.                                                     </span><br><span class="line">Use <span class="string">"kubectl options"</span> <span class="keyword">for</span> a list of global <span class="built_in">command</span>-line options (applies to all commands).</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+
+    
+      
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>谢谢鼓励</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150407-wechatpay-khan.png" alt="Khan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150331-Alipay-khan.png" alt="Khan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Khan</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ikhan.top/posts/overview-of-kubectl.html" title="Kubectl 命令参考">https://www.ikhan.top/posts/overview-of-kubectl.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+            <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          
+            <a href="/tags/kubectl/" rel="tag"># kubectl</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/qrqc-basic-k8s-interactive-tutorial-2.html" rel="next" title="K8S互动教程2-部署一个应用">
+                <i class="fa fa-chevron-left"></i> K8S互动教程2-部署一个应用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/qrqc-basic-k8s-interactive-tutorial-3.html" rel="prev" title="K8S互动教程3-查看 Pod 和 Nodes">
+                K8S互动教程3-查看 Pod 和 Nodes <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  
+    <img class="site-author-image" itemprop="image" src="https://blog.pic.ikhan.top/20181211093420-global-avatar.png" alt="Khan">
+  
+  <p class="site-author-name" itemprop="name">Khan</p>
+  <div class="site-description motion-element" itemprop="description">just do IT</div>
+</div>
+
+
+  <nav class="site-state motion-element">
+    
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+
+
+
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+
+
+  <div class="links-of-author motion-element">
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="/git@github.com:clarkhan" title="GitHub &rarr; git@github.com:clarkhan"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:clarkhan@163.com" title="E-Mail &rarr; mailto:clarkhan@163.com" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+  <div class="cc-license motion-element" itemprop="license">
+  
+  
+    
+  
+  
+  
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="external nofollow noopener noreferrer" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+
+
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#语法"><span class="nav-number">1.</span> <span class="nav-text">语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操作"><span class="nav-number">2.</span> <span class="nav-text">操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#资源类型"><span class="nav-number">3.</span> <span class="nav-text">资源类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#输出选项"><span class="nav-number">4.</span> <span class="nav-text">输出选项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Formatting-output"><span class="nav-number">4.1.</span> <span class="nav-text">Formatting output</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Syntax"><span class="nav-number">4.1.1.</span> <span class="nav-text">Syntax</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Example"><span class="nav-number">4.1.1.1.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Custom-columns"><span class="nav-number">4.1.2.</span> <span class="nav-text">Custom columns</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Examples"><span class="nav-number">4.1.2.1.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Server-side-columns"><span class="nav-number">4.1.3.</span> <span class="nav-text">Server-side columns</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Examples-1"><span class="nav-number">4.1.3.1.</span> <span class="nav-text">Examples</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sorting-list-objects"><span class="nav-number">4.2.</span> <span class="nav-text">Sorting list objects</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Syntax-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">Syntax</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Example-1"><span class="nav-number">4.2.1.1.</span> <span class="nav-text">Example</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例：常用操作"><span class="nav-number">5.</span> <span class="nav-text">示例：常用操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例：创建和使用-plugins"><span class="nav-number">6.</span> <span class="nav-text">示例：创建和使用 plugins</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">  <a href="http://www.beian.miit.gov.cn" rel="external nofollow noopener noreferrer" target="_blank">苏ICP备18070412号 </a>&copy; 2015 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Khan</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">109k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">1:39</span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+
+  
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.2.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.2.0"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+<script src="//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'kkqquVhYL2YnDXXyE2hyEDxl-gzGzoHsz',
+    appKey: 'SUyVEH4lL1HnSmYQUKeWjprm',
+    placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="theme-next gemini" lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    }
+  };
+</script>
+
+  <meta name="description" content="原文：https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/  Pod phasePod 的 status 字段是一个 PodStatus 对象，这个对象有个 phase 字段。Pod的阶段(phase)是对Pod在其生命周期中所处位置的简单的宏观的概述。这个阶段（phase）字段不是为了全面归纳容器或 Pod的状态，也不">
+<meta name="keywords" content="k8s,kubernetes,spinnaker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes Pod 的生命周期">
+<meta property="og:url" content="https://www.ikhan.top/posts/k8s-concepts-pod-lifecyle.html">
+<meta property="og:site_name" content="Khan">
+<meta property="og:description" content="原文：https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/  Pod phasePod 的 status 字段是一个 PodStatus 对象，这个对象有个 phase 字段。Pod的阶段(phase)是对Pod在其生命周期中所处位置的简单的宏观的概述。这个阶段（phase）字段不是为了全面归纳容器或 Pod的状态，也不">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-05-26T03:39:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes Pod 的生命周期">
+<meta name="twitter:description" content="原文：https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/  Pod phasePod 的 status 字段是一个 PodStatus 对象，这个对象有个 phase 字段。Pod的阶段(phase)是对Pod在其生命周期中所处位置的简单的宏观的概述。这个阶段（phase）字段不是为了全面归纳容器或 Pod的状态，也不">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ikhan.top/posts/k8s-concepts-pod-lifecyle">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  
+    <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    bookmark: {"enable":false,"save":"auto"},
+    fancybox: true,
+    mediumzoom: ,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false},
+    path: 'search.xml',
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  
+  <title>Kubernetes Pod 的生命周期 | Khan</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ba4657930258f8017b452935fd29ce61";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+  <script>
+    !function(e,t,n,g,i){e[i]=e[i]||function(){(e[i].q=e[i].q||[]).push(arguments)},n=t.createElement("script"),tag=t.getElementsByTagName("script")[0],n.async=1,n.src=('https:'==document.location.protocol?'https://':'http://')+g,tag.parentNode.insertBefore(n,tag)}(window,document,"script","assets.growingio.com/2.1/gio.js","gio");
+    gio('init','989beeea115aad9c', {});
+    gio('send');
+  </script>
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Khan</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">折腾各种技术，痛并快乐着~</h1>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ikhan.top/posts/k8s-concepts-pod-lifecyle.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Khan">
+      <meta itemprop="description" content="just do IT">
+      <meta itemprop="image" content="https://blog.pic.ikhan.top/20181211093420-global-avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Khan">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Kubernetes Pod 的生命周期
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-25 19:39:35" itemprop="dateCreated datePublished" datetime="2019-05-25T19:39:35+08:00">2019-05-25</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-05-26 11:39:58" itemprop="dateModified" datetime="2019-05-26T11:39:58+08:00">2019-05-26</time>
+              </span>
+            
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/容器/" itemprop="url" rel="index"><span itemprop="name">容器</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/posts/k8s-concepts-pod-lifecyle.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/posts/k8s-concepts-pod-lifecyle.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+            <span id="/posts/k8s-concepts-pod-lifecyle.html" class="post-meta-item leancloud_visitors" data-flag-title="Kubernetes Pod 的生命周期">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读次数：</span>
+              
+                <span class="leancloud-visitors-count"></span>
+            </span>
+          
+
+          
+
+          
+
+          <br>
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">本文字数：</span>
+              
+              <span title="本文字数">12k</span>
+            </span>
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              
+              <span title="阅读时长">11 分钟</span>
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>原文：<a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/" rel="external nofollow noopener noreferrer" target="_blank">https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/</a></p>
+<p><a name="zTJxZ"></a></p>
+<h2 id="Pod-phase"><a href="#Pod-phase" class="headerlink" title="Pod phase"></a>Pod phase</h2><p>Pod 的 <code>status</code> 字段是一个 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#podstatus-v1-core" rel="external nofollow noopener noreferrer" target="_blank">PodStatus</a> 对象，这个对象有个 <code>phase</code> 字段。<br>Pod的阶段(phase)是对Pod在其生命周期中所处位置的简单的宏观的概述。这个阶段（phase）字段不是为了全面归纳容器或 Pod的状态，也不打算成为全面的状态机。</p>
+<p>Pod 阶段的数量和含义是严格指定的。除了本文档列举的内容外，不应该再假设Pod会有其他的 <code>phase</code> 值。</p>
+<p>下面是所有 <code>phase</code>的可能值:</p>
+<a id="more"></a>
+
+<table>
+<thead>
+<tr>
+<th align="left">Value</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>Pending</code></td>
+<td align="left">The Pod has been accepted by the Kubernetes system, but one or more of the Container images has not been created. This includes time before being scheduled as well as time spent downloading images over the network, which could take a while.<br>Pod 已经被Kubernetes 系统接受，但是有一个或多个 Container 镜像还没被创建。这包含Pod被调度前和调度后通过网络下载镜像的时间，根据情况可能需要等一会。</td>
+</tr>
+<tr>
+<td align="left"><code>Running</code></td>
+<td align="left">The Pod has been bound to a node, and all of the Containers have been created. At least one Container is still running, or is in the process of starting or restarting.<br>Pod 已经被绑定到一个节点，而且所有的 Containers 已经被创建。至少有一个 Container 是正在运行的，或正处于启动中或重启中的状态。（也就是只要没都挂掉退出，没结束执行）</td>
+</tr>
+<tr>
+<td align="left"><code>Succeeded</code></td>
+<td align="left">All Containers in the Pod have terminated in success, and will not be restarted.<br>Pod 中所有的容器都成功的退出了（执行Job结束），而且不会被重启）。</td>
+</tr>
+<tr>
+<td align="left"><code>Failed</code></td>
+<td align="left">All Containers in the Pod have terminated, and at least one Container has terminated in failure. That is, the Container either exited with non-zero status or was terminated by the system.<br>Pod 中所有的 Containers都结束了，但不是所有的都成功，至少有一个失败了。也就是以非零的返回码退出或被系统终止。</td>
+</tr>
+<tr>
+<td align="left"><code>Unknown</code></td>
+<td align="left">For some reason the state of the Pod could not be obtained, typically due to an error in communicating with the host of the Pod.<br>由于某种原因无法取得 Pod 的状态，通常是由于Pod所在的宿主机（和master之间）的通信失败导致。（kubelet 无法正确上报状态）</td>
+</tr>
+</tbody></table>
+<p><a name="pod-conditions"></a></p>
+<h2 id="Pod-conditions"><a href="#Pod-conditions" class="headerlink" title="Pod conditions"></a>Pod conditions</h2><p>A Pod has a PodStatus, which has an array of <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#podcondition-v1-core" rel="external nofollow noopener noreferrer" target="_blank">PodConditions</a> through which the Pod has or has not passed. Each element of the PodCondition array has six possible fields:</p>
+<ul>
+<li><p>The <code>lastProbeTime</code> field provides a timestamp for when the Pod condition was last probed.<br></p>
+</li>
+<li><p>The <code>lastTransitionTime</code> field provides a timestamp for when the Pod last transitioned from one status to another.<br></p>
+</li>
+<li><p>The <code>message</code> field is a human-readable message indicating details about the transition.<br></p>
+</li>
+<li><p>The <code>reason</code> field is a unique, one-word, CamelCase reason for the condition’s last transition.<br></p>
+</li>
+<li><p>The <code>status</code> field is a string, with possible values “<code>True</code>”, “<code>False</code>”, and “<code>Unknown</code>”.<br></p>
+</li>
+<li><p>The<code>type</code>field is a string with the following possible values:</p>
+<ul>
+<li><code>PodScheduled</code>: the Pod has been scheduled to a node;</li>
+<li><code>Ready</code>: the Pod is able to serve requests and should be added to the load balancing pools of all matching Services;</li>
+<li><code>Initialized</code>: all <a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers" rel="external nofollow noopener noreferrer" target="_blank">init containers</a> have started successfully;</li>
+<li><code>Unschedulable</code>: the scheduler cannot schedule the Pod right now, for example due to lack of resources or other constraints;</li>
+<li><code>ContainersReady</code>: all containers in the Pod are ready.<br><a name="container-probes"></a><h2 id="Container-probes"><a href="#Container-probes" class="headerlink" title="Container probes"></a>Container probes</h2>A <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#probe-v1-core" rel="external nofollow noopener noreferrer" target="_blank">Probe</a> is a diagnostic performed periodically by the <a href="https://kubernetes.io/docs/admin/kubelet/" rel="external nofollow noopener noreferrer" target="_blank">kubelet</a> on a Container. To perform a diagnostic, the kubelet calls a<a href="https://godoc.org/k8s.io/kubernetes/pkg/api/v1#Handler" rel="external nofollow noopener noreferrer" target="_blank">Handler</a> implemented by the Container. There are three types of handlers:</li>
+</ul>
+</li>
+<li><p><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#execaction-v1-core" rel="external nofollow noopener noreferrer" target="_blank">ExecAction</a>: Executes a specified command inside the Container. The diagnostic is considered successful if the command exits with a status code of 0.<br></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#tcpsocketaction-v1-core" rel="external nofollow noopener noreferrer" target="_blank">TCPSocketAction</a>: Performs a TCP check against the Container’s IP address on a specified port. The diagnostic is considered successful if the port is open.<br></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#httpgetaction-v1-core" rel="external nofollow noopener noreferrer" target="_blank">HTTPGetAction</a>: Performs an HTTP Get request against the Container’s IP address on a specified port and path. The diagnostic is considered successful if the response has a status code greater than or equal to 200 and less than 400.<br></p>
+</li>
+</ul>
+<p>Each probe has one of three results:</p>
+<ul>
+<li>Success: The Container passed the diagnostic.</li>
+<li>Failure: The Container failed the diagnostic.</li>
+<li>Unknown: The diagnostic failed, so no action should be taken.</li>
+</ul>
+<p>The kubelet can optionally perform and react to two kinds of probes on running Containers:</p>
+<ul>
+<li><p><code>livenessProbe</code>: Indicates whether the Container is running. If the liveness probe fails, the kubelet kills the Container, and the Container is subjected to its <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy" rel="external nofollow noopener noreferrer" target="_blank">restart policy</a>. If a Container does not provide a liveness probe, the default state is <code>Success</code>.<br></p>
+</li>
+<li><p><code>readinessProbe</code>: Indicates whether the Container is ready to service requests. If the readiness probe fails, the endpoints controller removes the Pod’s IP address from the endpoints of all Services that match the Pod. The default state of readiness before the initial delay is <code>Failure</code>. If a Container does not provide a readiness probe, the default state is <code>Success</code>.<br><br><a name="when-should-you-use-liveness-or-readiness-probes"></a></p>
+<h3 id="When-should-you-use-liveness-or-readiness-probes"><a href="#When-should-you-use-liveness-or-readiness-probes" class="headerlink" title="When should you use liveness or readiness probes?"></a>When should you use liveness or readiness probes?</h3><p>If the process in your Container is able to crash on its own whenever it encounters an issue or becomes unhealthy, you do not necessarily need a liveness probe; the kubelet will automatically perform the correct action in accordance with the Pod’s <code>restartPolicy</code>.<br>If you’d like your Container to be killed and restarted if a probe fails, then specify a liveness probe, and specify a <code>restartPolicy</code> of Always or OnFailure.<br>If you’d like to start sending traffic to a Pod only when a probe succeeds, specify a readiness probe. In this case, the readiness probe might be the same as the liveness probe, but the existence of the readiness probe in the spec means that the Pod will start without receiving any traffic and only start receiving traffic after the probe starts succeeding. If your Container needs to work on loading large data, configuration files, or migrations during startup, specify a readiness probe.<br>If you want your Container to be able to take itself down for maintenance, you can specify a readiness probe that checks an endpoint specific to readiness that is different from the liveness probe.<br>Note that if you just want to be able to drain requests when the Pod is deleted, you do not necessarily need a readiness probe; on deletion, the Pod automatically puts itself into an unready state regardless of whether the readiness probe exists. The Pod remains in the unready state while it waits for the Containers in the Pod to stop.<br>For more information about how to set up a liveness or readiness probe, see <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/" rel="external nofollow noopener noreferrer" target="_blank">Configure Liveness and Readiness Probes</a>.<br><a name="pod-and-container-status"></a></p>
+<h2 id="Pod-and-Container-status"><a href="#Pod-and-Container-status" class="headerlink" title="Pod and Container status"></a>Pod and Container status</h2><p>For detailed information about Pod Container status, see <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#podstatus-v1-core" rel="external nofollow noopener noreferrer" target="_blank">PodStatus</a> and <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#containerstatus-v1-core" rel="external nofollow noopener noreferrer" target="_blank">ContainerStatus</a>. Note that the information reported as Pod status depends on the current <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#containerstatus-v1-core" rel="external nofollow noopener noreferrer" target="_blank">ContainerState</a>.<br><a name="container-states"></a></p>
+<h2 id="Container-States"><a href="#Container-States" class="headerlink" title="Container States"></a>Container States</h2><p>Once Pod is assigned to a node by scheduler, kubelet starts creating containers using container runtime.There are three possible states of containers: Waiting, Running and Terminated. To check state of container, you can use <code>kubectl describe pod [POD_NAME]</code>. State is displayed for each container within that Pod.</p>
+</li>
+<li><p><code>Waiting</code>: Default state of container. If container is not in either Running or Terminated state, it is in Waiting state. A container in Waiting state still runs its required operations, like pulling images, applying Secrets, etc. Along with this state, a message and reason about the state are displayed to provide more information.</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="symbol">  State:</span>          Waiting</span><br><span class="line"><span class="symbol">   Reason:</span>       ErrImagePull</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Running</code>: Indicates that the container is executing without issues. Once a container enters into Running, <code>postStart</code> hook (if any) is executed. This state also displays the time when the container entered Running state.<br></p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">      State:          Running</span><br><span class="line">       Started:      Wed, <span class="number">30</span> Jan <span class="number">2019</span> <span class="number">16</span>:<span class="number">46</span>:<span class="number">38</span> +<span class="number">0530</span></span><br><span class="line">   ...</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Terminated</code>: Indicates that the container completed its execution and has stopped running. A container enters into this when it has successfully completed execution or when it has failed for some reason. Regardless, a reason and exit code is displayed, as well as the container’s start and finish time. Before a container enters into Terminated, <code>preStop</code> hook (if any) is executed.</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">      State:          Terminated</span><br><span class="line">        Reason:       Completed</span><br><span class="line">        Exit Code:    <span class="number">0</span></span><br><span class="line">        Started:      Wed, <span class="number">30</span> Jan <span class="number">2019</span> <span class="number">11</span>:<span class="number">45</span>:<span class="number">26</span> +<span class="number">0530</span></span><br><span class="line">        Finished:     Wed, <span class="number">30</span> Jan <span class="number">2019</span> <span class="number">11</span>:<span class="number">45</span>:<span class="number">26</span> +<span class="number">0530</span></span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p><a name="pod-readiness-gate"></a></p>
+<h2 id="Pod-readiness-gate"><a href="#Pod-readiness-gate" class="headerlink" title="Pod readiness gate"></a>Pod readiness gate</h2><p><strong>FEATURE STATE:</strong> <code>Kubernetes v1.14</code> <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#" rel="external nofollow noopener noreferrer" target="_blank">stable</a><br>In order to add extensibility to Pod readiness by enabling the injection of extra feedbacks or signals into <code>PodStatus</code>, Kubernetes 1.11 introduced a feature named <a href="https://github.com/kubernetes/enhancements/blob/master/keps/sig-network/0007-pod-ready%2B%2B.md" rel="external nofollow noopener noreferrer" target="_blank">Pod ready++</a>. You can use the new field <code>ReadinessGate</code> in the <code>PodSpec</code> to specify additional conditions to be evaluated for Pod readiness. If Kubernetes cannot find such a condition in the <code>status.conditions</code> field of a Pod, the status of the condition is default to “<code>False</code>”. Below is an example:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="string">...</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">readinessGates:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">conditionType:</span> <span class="string">"www.example.com/feature-1"</span></span><br><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">Ready</span>  <span class="comment"># this is a builtin PodCondition</span></span><br><span class="line">      <span class="attr">status:</span> <span class="string">"False"</span></span><br><span class="line">      <span class="attr">lastProbeTime:</span> <span class="literal">null</span></span><br><span class="line">      <span class="attr">lastTransitionTime:</span> <span class="number">2018</span><span class="number">-01</span><span class="string">-01T00:00:00Z</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">"www.example.com/feature-1"</span>   <span class="comment"># an extra PodCondition</span></span><br><span class="line">      <span class="attr">status:</span> <span class="string">"False"</span></span><br><span class="line">      <span class="attr">lastProbeTime:</span> <span class="literal">null</span></span><br><span class="line">      <span class="attr">lastTransitionTime:</span> <span class="number">2018</span><span class="number">-01</span><span class="string">-01T00:00:00Z</span></span><br><span class="line">  <span class="attr">containerStatuses:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">containerID:</span> <span class="string">docker://abcd...</span></span><br><span class="line">      <span class="attr">ready:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">...</span></span><br></pre></td></tr></table></figure>
+
+<p>The new Pod conditions must comply with Kubernetes <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set" rel="external nofollow noopener noreferrer" target="_blank">label key format</a>. Since the <code>kubectl patch</code> command still doesn’t support patching object status, the new Pod conditions have to be injected through the <code>PATCH</code> action using one of the <a href="https://kubernetes.io/docs/reference/using-api/client-libraries/" rel="external nofollow noopener noreferrer" target="_blank">KubeClient libraries</a>.<br>With the introduction of new Pod conditions, a Pod is evaluated to be ready <strong>only</strong> when both the following statements are true:</p>
+<ul>
+<li>All containers in the Pod are ready.</li>
+<li>All conditions specified in <code>ReadinessGates</code> are “<code>True</code>”.</li>
+</ul>
+<p>To facilitate this change to Pod readiness evaluation, a new Pod condition <code>ContainersReady</code> is introduced to capture the old Pod <code>Ready</code> condition.<br>In K8s 1.11, as an alpha feature, the “Pod Ready++” feature has to be explicitly enabled by setting the <code>PodReadinessGates</code><a href="https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/" rel="external nofollow noopener noreferrer" target="_blank">feature gate</a> to true.<br>In K8s 1.12, the feature is enabled by default.<br><a name="restart-policy"></a></p>
+<h2 id="Restart-policy"><a href="#Restart-policy" class="headerlink" title="Restart policy"></a>Restart policy</h2><p>A PodSpec has a <code>restartPolicy</code> field with possible values Always, OnFailure, and Never. The default value is Always. <code>restartPolicy</code> applies to all Containers in the Pod. <code>restartPolicy</code> only refers to restarts of the Containers by the kubelet on the same node. Exited Containers that are restarted by the kubelet are restarted with an exponential back-off delay (10s, 20s, 40s …) capped at five minutes, and is reset after ten minutes of successful execution. As discussed in the <a href="https://kubernetes.io/docs/user-guide/pods/#durability-of-pods-or-lack-thereof" rel="external nofollow noopener noreferrer" target="_blank">Pods document</a>, once bound to a node, a Pod will never be rebound to another node.<br><a name="pod-lifetime"></a></p>
+<h2 id="Pod-lifetime"><a href="#Pod-lifetime" class="headerlink" title="Pod lifetime"></a>Pod lifetime</h2><p>In general, Pods do not disappear until someone destroys them. This might be a human or a controller. The only exception to this rule is that Pods with a <code>phase</code> of Succeeded or Failed for more than some duration (determined by <code>terminated-pod-gc-threshold</code> in the master) will expire and be automatically destroyed.<br>Three types of controllers are available:</p>
+<ul>
+<li>Use a <a href="https://kubernetes.io/docs/concepts/jobs/run-to-completion-finite-workloads/" rel="external nofollow noopener noreferrer" target="_blank">Job</a> for Pods that are expected to terminate, for example, batch computations. Jobs are appropriate only for Pods with <code>restartPolicy</code> equal to OnFailure or Never.<br></li>
+<li>Use a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller/" rel="external nofollow noopener noreferrer" target="_blank">ReplicationController</a>, <a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/" rel="external nofollow noopener noreferrer" target="_blank">ReplicaSet</a>, or <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/" rel="external nofollow noopener noreferrer" target="_blank">Deployment</a> for Pods that are not expected to terminate, for example, web servers. ReplicationControllers are appropriate only for Pods with a <code>restartPolicy</code> of Always.<br></li>
+<li>Use a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/" rel="external nofollow noopener noreferrer" target="_blank">DaemonSet</a> for Pods that need to run one per machine, because they provide a machine-specific system service.<br></li>
+</ul>
+<p>All three types of controllers contain a PodTemplate. It is recommended to create the appropriate controller and let it create Pods, rather than directly create Pods yourself. That is because Pods alone are not resilient to machine failures, but controllers are.<br>If a node dies or is disconnected from the rest of the cluster, Kubernetes applies a policy for setting the <code>phase</code> of all Pods on the lost node to Failed.<br><a name="examples"></a></p>
+<h2 id="Examples"><a href="#Examples" class="headerlink" title="Examples"></a>Examples</h2><p><a name="advanced-liveness-probe-example"></a></p>
+<h3 id="Advanced-liveness-probe-example"><a href="#Advanced-liveness-probe-example" class="headerlink" title="Advanced liveness probe example"></a>Advanced liveness probe example</h3><p>Liveness probes are executed by the kubelet, so all requests are made in the kubelet network namespace.</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">test:</span> <span class="string">liveness</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">liveness-http</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">args:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/server</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">k8s.gcr.io/liveness</span></span><br><span class="line">    <span class="attr">livenessProbe:</span></span><br><span class="line">      <span class="attr">httpGet:</span></span><br><span class="line">        <span class="comment"># when "host" is not defined, "PodIP" will be used</span></span><br><span class="line">        <span class="comment"># host: my-host</span></span><br><span class="line">        <span class="comment"># when "scheme" is not defined, "HTTP" scheme will be used. Only "HTTP" and "HTTPS" are allowed</span></span><br><span class="line">        <span class="comment"># scheme: HTTPS</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">/healthz</span></span><br><span class="line">        <span class="attr">port:</span> <span class="number">8080</span></span><br><span class="line">        <span class="attr">httpHeaders:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">X-Custom-Header</span></span><br><span class="line">          <span class="attr">value:</span> <span class="string">Awesome</span></span><br><span class="line">      <span class="attr">initialDelaySeconds:</span> <span class="number">15</span></span><br><span class="line">      <span class="attr">timeoutSeconds:</span> <span class="number">1</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">liveness</span></span><br></pre></td></tr></table></figure>
+
+<p><a name="example-states"></a></p>
+<h3 id="Example-states"><a href="#Example-states" class="headerlink" title="Example states"></a>Example states</h3><ul>
+<li><p>Pod is running and has one Container. Container exits with success.</p>
+<ul>
+<li>Log completion event.</li>
+<li>If<code>restartPolicy</code>is:<ul>
+<li>Always: Restart Container; Pod <code>phase</code> stays Running.</li>
+<li>OnFailure: Pod <code>phase</code> becomes Succeeded.</li>
+<li>Never: Pod <code>phase</code> becomes Succeeded.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pod is running and has one Container. Container exits with failure.</p>
+<ul>
+<li>Log failure event.</li>
+<li>If<code>restartPolicy</code>is:<ul>
+<li>Always: Restart Container; Pod <code>phase</code> stays Running.</li>
+<li>OnFailure: Restart Container; Pod <code>phase</code> stays Running.</li>
+<li>Never: Pod <code>phase</code> becomes Failed.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pod is running and has two Containers. Container 1 exits with failure.</p>
+<ul>
+<li>Log failure event.</li>
+<li>If<code>restartPolicy</code>is:<ul>
+<li>Always: Restart Container; Pod <code>phase</code> stays Running.</li>
+<li>OnFailure: Restart Container; Pod <code>phase</code> stays Running.</li>
+<li>Never: Do not restart Container; Pod <code>phase</code> stays Running.</li>
+</ul>
+</li>
+<li>If Container 1 is not running, and Container 2 exits:<ul>
+<li>Log failure event.</li>
+<li>If<code>restartPolicy</code>is:<ul>
+<li>Always: Restart Container; Pod <code>phase</code> stays Running.</li>
+<li>OnFailure: Restart Container; Pod <code>phase</code> stays Running.</li>
+<li>Never: Pod <code>phase</code> becomes Failed.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pod is running and has one Container. Container runs out of memory.</p>
+<ul>
+<li>Container terminates in failure.</li>
+<li>Log OOM event.</li>
+<li>If<code>restartPolicy</code>is:<ul>
+<li>Always: Restart Container; Pod <code>phase</code> stays Running.</li>
+<li>OnFailure: Restart Container; Pod <code>phase</code> stays Running.</li>
+<li>Never: Log failure event; Pod <code>phase</code> becomes Failed.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pod is running, and a disk dies.</p>
+<ul>
+<li>Kill all Containers.</li>
+<li>Log appropriate event.</li>
+<li>Pod <code>phase</code> becomes Failed.</li>
+<li>If running under a controller, Pod is recreated elsewhere.</li>
+</ul>
+</li>
+<li><p>Pod is running, and its node is segmented out.</p>
+<ul>
+<li>Node controller waits for timeout.</li>
+<li>Node controller sets Pod <code>phase</code> to Failed.</li>
+<li>If running under a controller, Pod is recreated elsewhere.<br><a name="what-s-next"></a><h2 id="What’s-next"><a href="#What’s-next" class="headerlink" title="What’s next"></a>What’s next</h2></li>
+</ul>
+</li>
+<li><p>Get hands-on experience <a href="https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/" rel="external nofollow noopener noreferrer" target="_blank">attaching handlers to Container lifecycle events</a>.<br></p>
+</li>
+<li><p>Get hands-on experience <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/" rel="external nofollow noopener noreferrer" target="_blank">configuring liveness and readiness probes</a>.<br></p>
+</li>
+<li><p>Learn more about <a href="https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/" rel="external nofollow noopener noreferrer" target="_blank">Container lifecycle hooks</a>.<br></p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+      
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>谢谢鼓励</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150407-wechatpay-khan.png" alt="Khan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150331-Alipay-khan.png" alt="Khan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Khan</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ikhan.top/posts/k8s-concepts-pod-lifecyle.html" title="Kubernetes Pod 的生命周期">https://www.ikhan.top/posts/k8s-concepts-pod-lifecyle.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+            <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          
+            <a href="/tags/spinnaker/" rel="tag"># spinnaker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/qrqc-basic-k8s-interactive-tutorial-3.html" rel="next" title="K8S互动教程3-查看 Pod 和 Nodes">
+                <i class="fa fa-chevron-left"></i> K8S互动教程3-查看 Pod 和 Nodes
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/qrqc-basic-k8s-interactive-tutorial-4.html" rel="prev" title="K8S互动教程4-使用服务发布您的应用程序">
+                K8S互动教程4-使用服务发布您的应用程序 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  
+    <img class="site-author-image" itemprop="image" src="https://blog.pic.ikhan.top/20181211093420-global-avatar.png" alt="Khan">
+  
+  <p class="site-author-name" itemprop="name">Khan</p>
+  <div class="site-description motion-element" itemprop="description">just do IT</div>
+</div>
+
+
+  <nav class="site-state motion-element">
+    
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+
+
+
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+
+
+  <div class="links-of-author motion-element">
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="/git@github.com:clarkhan" title="GitHub &rarr; git@github.com:clarkhan"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:clarkhan@163.com" title="E-Mail &rarr; mailto:clarkhan@163.com" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+  <div class="cc-license motion-element" itemprop="license">
+  
+  
+    
+  
+  
+  
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="external nofollow noopener noreferrer" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+
+
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-phase"><span class="nav-number">1.</span> <span class="nav-text">Pod phase</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-conditions"><span class="nav-number">2.</span> <span class="nav-text">Pod conditions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Container-probes"><span class="nav-number">3.</span> <span class="nav-text">Container probes</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#When-should-you-use-liveness-or-readiness-probes"><span class="nav-number">3.1.</span> <span class="nav-text">When should you use liveness or readiness probes?</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-and-Container-status"><span class="nav-number">4.</span> <span class="nav-text">Pod and Container status</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Container-States"><span class="nav-number">5.</span> <span class="nav-text">Container States</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-readiness-gate"><span class="nav-number">6.</span> <span class="nav-text">Pod readiness gate</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Restart-policy"><span class="nav-number">7.</span> <span class="nav-text">Restart policy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-lifetime"><span class="nav-number">8.</span> <span class="nav-text">Pod lifetime</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Examples"><span class="nav-number">9.</span> <span class="nav-text">Examples</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Advanced-liveness-probe-example"><span class="nav-number">9.1.</span> <span class="nav-text">Advanced liveness probe example</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Example-states"><span class="nav-number">9.2.</span> <span class="nav-text">Example states</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What’s-next"><span class="nav-number">10.</span> <span class="nav-text">What’s next</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">  <a href="http://www.beian.miit.gov.cn" rel="external nofollow noopener noreferrer" target="_blank">苏ICP备18070412号 </a>&copy; 2015 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Khan</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">109k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">1:39</span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+
+  
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.2.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.2.0"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+<script src="//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'kkqquVhYL2YnDXXyE2hyEDxl-gzGzoHsz',
+    appKey: 'SUyVEH4lL1HnSmYQUKeWjprm',
+    placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

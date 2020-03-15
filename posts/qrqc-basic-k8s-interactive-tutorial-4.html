@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="theme-next gemini" lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    }
+  };
+</script>
+
+  <meta name="description" content="本文是《浅入浅出k8s实战-k8s初体验篇的第五篇 》 此文为提取大纲，按照互动教程进行分享教学用。另补充一些知识点，和关联操作。 原文：  中：https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/expose-intro/ 英：https://kubernetes.io/docs/tutorials/kubernetes-basic">
+<meta name="keywords" content="k8s,kubernetes,浅入浅出k8s实战">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K8S互动教程4-使用服务发布您的应用程序">
+<meta property="og:url" content="https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-4.html">
+<meta property="og:site_name" content="Khan">
+<meta property="og:description" content="本文是《浅入浅出k8s实战-k8s初体验篇的第五篇 》 此文为提取大纲，按照互动教程进行分享教学用。另补充一些知识点，和关联操作。 原文：  中：https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/expose-intro/ 英：https://kubernetes.io/docs/tutorials/kubernetes-basic">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/svg/328984/1558947695592-a71ad54b-2675-40f1-9b68-d9b4e2ae8fee.svg#align=left&display=inline&height=514&originHeight=440&originWidth=394&size=0&status=done&width=460">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2019/svg/328984/1558948479829-92590b36-e40f-469c-80fa-e4f4d621c65a.svg#align=left&display=inline&height=528&originHeight=150&originWidth=134&size=0&status=done&width=470">
+<meta property="og:updated_time" content="2019-05-28T07:29:07.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="K8S互动教程4-使用服务发布您的应用程序">
+<meta name="twitter:description" content="本文是《浅入浅出k8s实战-k8s初体验篇的第五篇 》 此文为提取大纲，按照互动教程进行分享教学用。另补充一些知识点，和关联操作。 原文：  中：https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/expose-intro/ 英：https://kubernetes.io/docs/tutorials/kubernetes-basic">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2019/svg/328984/1558947695592-a71ad54b-2675-40f1-9b68-d9b4e2ae8fee.svg#align=left&display=inline&height=514&originHeight=440&originWidth=394&size=0&status=done&width=460">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+
+
+
+  
+  
+  <link rel="canonical" href="https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-4">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  
+    <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.2.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.2.0">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=7.2.0" color="#222">
+  <link rel="alternate" href="/atom.xml" title="Khan" type="application/atom+xml">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.2.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    bookmark: {"enable":false,"save":"auto"},
+    fancybox: true,
+    mediumzoom: ,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false},
+    path: 'search.xml',
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  
+  <title>K8S互动教程4-使用服务发布您的应用程序 | Khan</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ba4657930258f8017b452935fd29ce61";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+  <script>
+    !function(e,t,n,g,i){e[i]=e[i]||function(){(e[i].q=e[i].q||[]).push(arguments)},n=t.createElement("script"),tag=t.getElementsByTagName("script")[0],n.async=1,n.src=('https:'==document.location.protocol?'https://':'http://')+g,tag.parentNode.insertBefore(n,tag)}(window,document,"script","assets.growingio.com/2.1/gio.js","gio");
+    gio('init','989beeea115aad9c', {});
+    gio('send');
+  </script>
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Khan</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">折腾各种技术，痛并快乐着~</h1>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-4.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Khan">
+      <meta itemprop="description" content="just do IT">
+      <meta itemprop="image" content="https://blog.pic.ikhan.top/20181211093420-global-avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Khan">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">K8S互动教程4-使用服务发布您的应用程序
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-26 19:39:35" itemprop="dateCreated datePublished" datetime="2019-05-26T19:39:35+08:00">2019-05-26</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-05-28 15:29:07" itemprop="dateModified" datetime="2019-05-28T15:29:07+08:00">2019-05-28</time>
+              </span>
+            
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/容器-浅入浅出k8s实战/" itemprop="url" rel="index"><span itemprop="name">容器,浅入浅出k8s实战</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/posts/qrqc-basic-k8s-interactive-tutorial-4.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/posts/qrqc-basic-k8s-interactive-tutorial-4.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+            <span id="/posts/qrqc-basic-k8s-interactive-tutorial-4.html" class="post-meta-item leancloud_visitors" data-flag-title="K8S互动教程4-使用服务发布您的应用程序">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读次数：</span>
+              
+                <span class="leancloud-visitors-count"></span>
+            </span>
+          
+
+          
+
+          
+
+          <br>
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">本文字数：</span>
+              
+              <span title="本文字数">9.3k</span>
+            </span>
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              
+              <span title="阅读时长">8 分钟</span>
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文是《浅入浅出k8s实战-k8s初体验篇的第五篇 》</p>
+<p>此文为提取大纲，按照互动教程进行分享教学用。另补充一些知识点，和关联操作。</p>
+<p>原文：</p>
+<ul>
+<li>中：<a href="https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/expose-intro/" rel="external nofollow noopener noreferrer" target="_blank">https://kubernetes.io/zh/docs/tutorials/kubernetes-basics/expose-intro/</a></li>
+<li>英：<a href="https://kubernetes.io/docs/tutorials/kubernetes-basics/expose/expose-intro/" rel="external nofollow noopener noreferrer" target="_blank">https://kubernetes.io/docs/tutorials/kubernetes-basics/expose/expose-intro/</a></li>
+<li>互动：<a href="https://kubernetes.io/docs/tutorials/kubernetes-basics/expose/expose-interactive/" rel="external nofollow noopener noreferrer" target="_blank">https://kubernetes.io/docs/tutorials/kubernetes-basics/expose/expose-interactive/</a></li>
+</ul>
+<p><a name="nysyV"></a></p>
+<h2 id="课程说明"><a href="#课程说明" class="headerlink" title="课程说明"></a>课程说明</h2><p><a name="g0oq9"></a></p>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><ul>
+<li>了解 Kubernetes Service（服务）</li>
+<li>了解 labels 和 LabelSelector 对象如何与 Service 关联</li>
+<li>通过 Service 将应用暴露到集群外部</li>
+</ul>
+<a id="more"></a>
+
+<p><a name="b9NpW"></a></p>
+<h3 id="操作内容"><a href="#操作内容" class="headerlink" title="操作内容"></a>操作内容</h3><ul>
+<li>创建新的服务</li>
+<li>使用Labels</li>
+<li>删除Service</li>
+</ul>
+<p><a name="IUgxn"></a></p>
+<h3 id="Kubernetes-Service-概述"><a href="#Kubernetes-Service-概述" class="headerlink" title="Kubernetes Service 概述"></a>Kubernetes Service 概述</h3><p>Kubernetes Pods 不是永久存在的，它有一个<a href="https://www.ikhan.top/posts/k8s-concepts-pod-lifecyle.html">生命周期</a>。当一个工作Node宕机是，运行在这个Node上的Pods也会丢失。<a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/" rel="external nofollow noopener noreferrer" target="_blank">ReplicatSet</a> 可能会通过创建新的Pod，动态地调度集群使之恢复到目标状态来保证您的应用继续运行。比如说，有个拥有3个副本的图形处理后端程序，这些副本是可以被替换的（简单理解为无状态的）。其前端系统不应该关心后端的副本情况，即使副本的Pod丢失后被重建。Kubernetes集群中每一个Pod有一个独立的IP，即使在同一个Node上也是这样，这样的话我们就需要一种能够<strong>自动应对Pod间变化</strong>的机制来保证我们的程序能持续的运行。</p>
+<p>Kubernetes 中的Service是一个抽象资源，它定义了一组Pod的逻辑集合和<strong>通过Service访问这些Pod的策略</strong>。Services支持有依赖关系的Pods松耦合。Service 像所有Kubernetes对象一样，支持使用Yaml（推荐）或JSON。Service 指向的一组Pods通常<strong>由 LabelSelector 指定</strong>（为什么你可能不想要在Service 的 spce 中包含 <code>selector</code> 请参见下文）。</p>
+<p>尽管每个Pod都有一个唯一的IP地址，但不通过Service这些IP不会被暴露到集群外部（一般意义上是这样，但存在网络互通方案）。Services允许你的应用接收流量。通过指定ServiceSpec中的 <code>type</code> 字段，Services可以被不同的方式<strong>暴露</strong>：</p>
+<ul>
+<li>ClusterIP（默认）- 在集群内部IP上暴露Service。这种方式Service只能在集群内部被访问。</li>
+<li>NodePort - 通过NAT在每个选中（未找到限定方式，应该是所有Node？）Node上的相同端口暴露Service。使一个Service可以通过 <code>&lt;NodeIP&gt;:&lt;NodePort&gt;</code> 的形式从外部访问，这种方式是 ClusterIP 的超集。</li>
+<li>LoadBalancer - 在当前云平台创建外部的负载均衡器（如果支持的话） ，并为Service分配一个固定的集群外部IP，是NodePort的超集。</li>
+<li>ExternalName - 使用任意的名称暴露Service（通过spec的 <code>externalName</code> 指定），其行为是返回使用这个名称的CNAME记录。无需使用代理。这种方式要求 V1.7或更高版本的 <code>kube-dns</code> 。</li>
+</ul>
+<p>关于不同类型 Services 的更多信息，可以参见<a href="https://kubernetes.io/docs/tutorials/services/source-ip/" rel="external nofollow noopener noreferrer" target="_blank">Using Source IP</a>教程和<a href="https://kubernetes.io/docs/concepts/services-networking/connect-applications-service" rel="external nofollow noopener noreferrer" target="_blank">Connecting Applications with Services</a>。<br>另外，需要注意的是有些情况下Services不在spec中定义 <code>selector</code> 。没有 <code>selector</code> 定义创建的Service也不会创建相应的端点（Endpoints）。这样用户可以手动映射Service到特定的endpoints。另外一种没有selector的情况是严格用了 <code>type: ExternalName</code> 类型的Service。<br><a name="g6eHG"></a></p>
+<h3 id="服务和标签"><a href="#服务和标签" class="headerlink" title="服务和标签"></a>服务和标签</h3><p><img src="https://cdn.nlark.com/yuque/0/2019/svg/328984/1558947695592-a71ad54b-2675-40f1-9b68-d9b4e2ae8fee.svg#align=left&display=inline&height=514&originHeight=440&originWidth=394&size=0&status=done&width=460" alt><br>服务可以路由流量到一组Pods上。服务是一个抽象资源，允许Kubernetes中Pod在宕掉和复制的情况下不对应用造成冲击。有依赖关系的Pods间（比如一个应用的前端和后端组件）发现和路由通过Kubernetes Services处理。</p>
+<p>Services使用<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels" rel="external nofollow noopener noreferrer" target="_blank">labels and selectors</a>匹配一组Pods。lables和selectors是Kubernetes可以在对象上进行逻辑运算的分组原语。Labels 是附加到对象上的键值对，会在多种场景中被使用：</p>
+<ul>
+<li>指定和区分对象是开发、测试还是生产环境</li>
+<li>嵌入版本号</li>
+<li>用标签（tags）分类对象<blockquote>
+<p>你可以使用kubectl 的 <code>--expose</code> 参数，在创建 Deployment 的同时创建 Service。</p>
+</blockquote>
+</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2019/svg/328984/1558948479829-92590b36-e40f-469c-80fa-e4f4d621c65a.svg#align=left&display=inline&height=528&originHeight=150&originWidth=134&size=0&status=done&width=470" alt><br>Labels 可以创建对象的时候或之后附加到对象上。可以在任何时候被修改。我们一起使用Service暴露我么的应用，并应用一些labels吧。<br><a name="I7Mqr"></a></p>
+<h2 id="互动教程"><a href="#互动教程" class="headerlink" title="互动教程"></a>互动教程</h2><p><a name="1o6XR"></a></p>
+<h3 id="创建新的服务"><a href="#创建新的服务" class="headerlink" title="创建新的服务"></a>创建新的服务</h3><p>我们先看下基于<a href="https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-3.html">上一节</a>之后我们系统里有哪些Pods：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                                  READY   STATUS    RESTARTS   AGE</span><br><span class="line">first-deploy-whoami-68dd7db55-bpr52   1/1     Running   0          4d1h</span><br></pre></td></tr></table></figure>
+
+<p>然后再看看已有的 Services：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get services</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE</span><br><span class="line">kubernetes   ClusterIP   10.96.0.1    &lt;none&gt;        443/TCP   10d</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到一个已经存在的名叫kubernetes的服务，这个是minikube在集群启动的时候自动创建的。这个是 API Server 的 Service。非 minikube 创建的集群default namespace下也有。</p>
+<p>我们来创建如下几个不同的 Service：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment first-deploy-whoami --name first-deploy-whoami-svc-1 --<span class="built_in">type</span> LoadBalancer --port 8080 --target-port 80</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment first-deploy-whoami --name first-deploy-whoami-svc-2 --<span class="built_in">type</span> NodePort --port 80</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment first-deploy-whoami --name first-deploy-whoami-svc-3 --<span class="built_in">type</span> ClusterIP --port 8080 --target-port 80</span><br></pre></td></tr></table></figure>
+
+<p>我们使用的方式是暴露我们前两节创建的 deployment 对应的 Pods。 <code>--name</code> 后就是我们指定的 Service name， <code>--type</code> 是指定Service的暴露方式。 <code>--port</code> 是Service对外服务的端口。 <code>--target-port</code> 是Service映射的Endpoints 端口部分（Pods的对外服务端口）。需要注意的是，如果<code>--port</code> 或 <code>--target-port</code> 没有指定，将默认取另一项的值。都没指定则取Pods暴露的端口。</p>
+<p>当然， <code>expose</code> 可以将很多kubernetes资源对应的Pods暴露为服务，包含：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod (po),<span class="built_in"> service </span>(svc), replicationcontroller (rc), deployment (deploy), replicaset (rs)</span><br></pre></td></tr></table></figure>
+
+<p>我们之前暴露的几个服务通过</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get services</span><br></pre></td></tr></table></figure>
+
+<p>和 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe services first-deploy-whoami-svc-1 first-deploy-whoami-svc-2 first-deploy-whoami-svc-3</span><br></pre></td></tr></table></figure>
+
+<p>来看一下。着重关注IP，Port，TargetPort，NodePort和 Endpoints字段。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">➜</span>  <span class="string">clark</span> <span class="string">kubectl</span> <span class="string">get</span> <span class="string">services</span></span><br><span class="line"><span class="string">NAME</span>                        <span class="string">TYPE</span>           <span class="string">CLUSTER-IP</span>     <span class="string">EXTERNAL-IP</span>   <span class="string">PORT(S)</span>          <span class="string">AGE</span></span><br><span class="line"><span class="string">first-deploy-whoami-svc-1</span>   <span class="string">LoadBalancer</span>   <span class="number">10.103</span><span class="number">.234</span><span class="number">.1</span>   <span class="string">&lt;pending&gt;</span>     <span class="number">8080</span><span class="string">:30095/TCP</span>   <span class="string">18h</span></span><br><span class="line"><span class="string">first-deploy-whoami-svc-2</span>   <span class="string">NodePort</span>       <span class="number">10.102</span><span class="number">.32</span><span class="number">.78</span>   <span class="string">&lt;none&gt;</span>        <span class="number">80</span><span class="string">:31502/TCP</span>     <span class="string">18h</span></span><br><span class="line"><span class="string">first-deploy-whoami-svc-3</span>   <span class="string">ClusterIP</span>      <span class="number">10.101</span><span class="number">.43</span><span class="number">.23</span>   <span class="string">&lt;none&gt;</span>        <span class="number">8080</span><span class="string">/TCP</span>         <span class="string">18h</span></span><br><span class="line"><span class="string">kubernetes</span>                  <span class="string">ClusterIP</span>      <span class="number">10.96</span><span class="number">.0</span><span class="number">.1</span>      <span class="string">&lt;none&gt;</span>        <span class="number">443</span><span class="string">/TCP</span>          <span class="string">11d</span></span><br><span class="line"><span class="string">➜</span>  <span class="string">clark</span> <span class="string">kubectl</span> <span class="string">describe</span> <span class="string">services</span> <span class="string">first-deploy-whoami-svc-1</span> <span class="string">first-deploy-whoami-svc-2</span> <span class="string">first-deploy-whoami-svc-3</span></span><br><span class="line"><span class="attr">Name:</span>                     <span class="string">first-deploy-whoami-svc-1</span></span><br><span class="line"><span class="attr">Namespace:</span>                <span class="string">default</span></span><br><span class="line"><span class="attr">Labels:</span>                   <span class="string">run=first-deploy-whoami</span></span><br><span class="line"><span class="attr">Annotations:</span>              <span class="string">&lt;none&gt;</span></span><br><span class="line"><span class="attr">Selector:</span>                 <span class="string">run=first-deploy-whoami</span></span><br><span class="line"><span class="attr">Type:</span>                     <span class="string">LoadBalancer</span></span><br><span class="line"><span class="attr">IP:</span>                       <span class="number">10.103</span><span class="number">.234</span><span class="number">.1</span></span><br><span class="line"><span class="attr">Port:</span>                     <span class="string">&lt;unset&gt;</span>  <span class="number">8080</span><span class="string">/TCP</span></span><br><span class="line"><span class="attr">TargetPort:</span>               <span class="number">80</span><span class="string">/TCP</span></span><br><span class="line"><span class="attr">NodePort:</span>                 <span class="string">&lt;unset&gt;</span>  <span class="number">30095</span><span class="string">/TCP</span></span><br><span class="line"><span class="attr">Endpoints:</span>                <span class="number">172.17</span><span class="number">.0</span><span class="number">.5</span><span class="string">:80</span></span><br><span class="line"><span class="attr">Session Affinity:</span>         <span class="string">None</span></span><br><span class="line"><span class="attr">External Traffic Policy:</span>  <span class="string">Cluster</span></span><br><span class="line"><span class="attr">Events:</span>                   <span class="string">&lt;none&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="attr">Name:</span>                     <span class="string">first-deploy-whoami-svc-2</span></span><br><span class="line"><span class="attr">Namespace:</span>                <span class="string">default</span></span><br><span class="line"><span class="attr">Labels:</span>                   <span class="string">run=first-deploy-whoami</span></span><br><span class="line"><span class="attr">Annotations:</span>              <span class="string">&lt;none&gt;</span></span><br><span class="line"><span class="attr">Selector:</span>                 <span class="string">run=first-deploy-whoami</span></span><br><span class="line"><span class="attr">Type:</span>                     <span class="string">NodePort</span></span><br><span class="line"><span class="attr">IP:</span>                       <span class="number">10.102</span><span class="number">.32</span><span class="number">.78</span></span><br><span class="line"><span class="attr">Port:</span>                     <span class="string">&lt;unset&gt;</span>  <span class="number">80</span><span class="string">/TCP</span></span><br><span class="line"><span class="attr">TargetPort:</span>               <span class="number">80</span><span class="string">/TCP</span></span><br><span class="line"><span class="attr">NodePort:</span>                 <span class="string">&lt;unset&gt;</span>  <span class="number">31502</span><span class="string">/TCP</span></span><br><span class="line"><span class="attr">Endpoints:</span>                <span class="number">172.17</span><span class="number">.0</span><span class="number">.5</span><span class="string">:80</span></span><br><span class="line"><span class="attr">Session Affinity:</span>         <span class="string">None</span></span><br><span class="line"><span class="attr">External Traffic Policy:</span>  <span class="string">Cluster</span></span><br><span class="line"><span class="attr">Events:</span>                   <span class="string">&lt;none&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="attr">Name:</span>              <span class="string">first-deploy-whoami-svc-3</span></span><br><span class="line"><span class="attr">Namespace:</span>         <span class="string">default</span></span><br><span class="line"><span class="attr">Labels:</span>            <span class="string">run=first-deploy-whoami</span></span><br><span class="line"><span class="attr">Annotations:</span>       <span class="string">&lt;none&gt;</span></span><br><span class="line"><span class="attr">Selector:</span>          <span class="string">run=first-deploy-whoami</span></span><br><span class="line"><span class="attr">Type:</span>              <span class="string">ClusterIP</span></span><br><span class="line"><span class="attr">IP:</span>                <span class="number">10.101</span><span class="number">.43</span><span class="number">.23</span></span><br><span class="line"><span class="attr">Port:</span>              <span class="string">&lt;unset&gt;</span>  <span class="number">8080</span><span class="string">/TCP</span></span><br><span class="line"><span class="attr">TargetPort:</span>        <span class="number">80</span><span class="string">/TCP</span></span><br><span class="line"><span class="attr">Endpoints:</span>         <span class="number">172.17</span><span class="number">.0</span><span class="number">.5</span><span class="string">:80</span></span><br><span class="line"><span class="attr">Session Affinity:</span>  <span class="string">None</span></span><br><span class="line"><span class="attr">Events:</span>            <span class="string">&lt;none&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>IP 就是集群内的IP</li>
+<li>Port和TargetPort上面介绍过，对应 <code>--port</code> 和 <code>--target-port</code> </li>
+<li>NodePort通过命令的方式未能找到指定的参数（如果发现请留言告诉我），但YAML等方式可以指定。所以此处不指定会默认从30000-32767中随机一个端口，这个随机范围可以在API server的配置文件中，用–service-node-port-range定义。</li>
+<li>Endpoints 就是Service映射的Pod ip+port 了，会根据Pod情况动态变化。</li>
+</ul>
+<p>根据我们创建的不同Service类型，也可以印证我们之前提到的“超集”概念。LoadBalancer 包含 NodePort 包含 ClusterIP。</p>
+<p>minikube 并不支持 <code>LoadBalancer</code> 类型的Service，所以其 <code>External-IP</code> 一直是 <code>&lt;pending&gt;</code> 状态。对于有node port的Service，minikube 可以通过 <code>service</code> 命令来在浏览器打开或者显示其访问地址：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube.exe service first-deploy-whoami-svc-1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube.exe service first-deploy-whoami-svc-2 --url</span><br></pre></td></tr></table></figure>
+
+<p>也可以列出所有的Service的访问地址：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">➜  clark minikube.exe service list                                        </span><br><span class="line">|-------------|---------------------------|-----------------------------| </span><br><span class="line">|  NAMESPACE  |           NAME            |             URL             | </span><br><span class="line">|-------------|---------------------------|-----------------------------| </span><br><span class="line">| default     | first-deploy-whoami-svc-1 | http://192.168.99.101:30095 | </span><br><span class="line">| default     | first-deploy-whoami-svc-2 | http://192.168.99.101:31502 | </span><br><span class="line">| default     | first-deploy-whoami-svc-3 | No node port                | </span><br><span class="line">| default     | kubernetes                | No node port                | </span><br><span class="line">| kube-system | kube-dns                  | No node port                | </span><br><span class="line">| kube-system | kubernetes-dashboard      | No node port                | </span><br><span class="line">|-------------|---------------------------|-----------------------------|</span><br></pre></td></tr></table></figure>
+
+<p>通过上面的地址，你应该可以访问到Pod的应用，如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  clark curl http://192.168.99.101:30095/</span><br><span class="line">Hostname: first-deploy-whoami-68dd7db55-8rhd2</span><br><span class="line">IP: 127.0.0.1</span><br><span class="line">IP: 172.17.0.5</span><br><span class="line">GET / HTTP/1.1</span><br><span class="line">Host: 192.168.99.101:30095</span><br><span class="line">User-Agent: curl/7.58.0</span><br><span class="line">Accept: */*</span><br></pre></td></tr></table></figure>
+
+<p>我们可以尝试在集群中访问这几个服务，启动新的一次性Pods访问：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl run <span class="built_in">test</span>-service-pod -it --rm --restart=Never --image=busybox --port=80 --generator=run-pod/v1 -- wget -q -O - http://first-deploy-whoami-svc-1:8080</span><br></pre></td></tr></table></figure>
+
+<p>如果你想在Service映射的Pod中通过Service访问Pod自己，可能会遇到无法访问的情况，请参照这篇文章：<br><a href="https://www.ikhan.top/posts/pod-can-not-traffic-to-isself-via-service.html">Pods 无法通过 Service 访问自己</a>。</p>
+<p><a name="QB5vB"></a></p>
+<h3 id="使用-Labels"><a href="#使用-Labels" class="headerlink" title="使用 Labels"></a>使用 Labels</h3><p>复习获取 deployments 的命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe deployments</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到类似的输出：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">➜</span>  <span class="string">clark</span> <span class="string">kubectl</span> <span class="string">describe</span> <span class="string">deployments</span>                                                                              </span><br><span class="line"><span class="attr">Name:</span>                   <span class="string">first-deploy-whoami</span>                                                                        </span><br><span class="line"><span class="attr">Namespace:</span>              <span class="string">default</span>                                                                                    </span><br><span class="line"><span class="attr">CreationTimestamp:</span>      <span class="string">Tue,</span> <span class="number">28</span> <span class="string">May</span> <span class="number">2019</span> <span class="number">13</span><span class="string">:20:39</span> <span class="string">+0800</span>                                                            </span><br><span class="line"><span class="attr">Labels:</span>                 <span class="string">run=first-deploy-whoami</span>                                                                    </span><br><span class="line"><span class="attr">Annotations:            deployment.kubernetes.io/revision:</span> <span class="number">1</span>                                                       </span><br><span class="line"><span class="attr">Selector:</span>               <span class="string">run=first-deploy-whoami</span>                                                                    </span><br><span class="line"><span class="attr">Replicas:</span>               <span class="number">1</span> <span class="string">desired</span> <span class="string">|</span> <span class="number">1</span> <span class="string">updated</span> <span class="string">|</span> <span class="number">1</span> <span class="string">total</span> <span class="string">|</span> <span class="number">1</span> <span class="string">available</span> <span class="string">|</span> <span class="number">0</span> <span class="string">unavailable</span>                              </span><br><span class="line"><span class="attr">StrategyType:</span>           <span class="string">RollingUpdate</span>                                                                              </span><br><span class="line"><span class="attr">MinReadySeconds:</span>        <span class="number">0</span>                                                                                          </span><br><span class="line"><span class="attr">RollingUpdateStrategy:</span>  <span class="number">25</span><span class="string">%</span> <span class="string">max</span> <span class="string">unavailable,</span> <span class="number">25</span><span class="string">%</span> <span class="string">max</span> <span class="string">surge</span>                                                         </span><br><span class="line"><span class="attr">Pod Template:</span>                                                                                                      </span><br><span class="line">  <span class="attr">Labels:</span>  <span class="string">run=first-deploy-whoami</span>                                                                                 </span><br><span class="line">  <span class="attr">Containers:</span>                                                                                                      </span><br><span class="line">   <span class="attr">first-deploy-whoami:</span>                                                                                            </span><br><span class="line">    <span class="attr">Image:</span>        <span class="string">registry.cn-hangzhou.aliyuncs.com/khan/whoami:1.0</span>                                                </span><br><span class="line">    <span class="attr">Port:</span>         <span class="number">80</span><span class="string">/TCP</span>                                                                                           </span><br><span class="line">    <span class="attr">Host Port:</span>    <span class="number">0</span><span class="string">/TCP</span>                                                                                            </span><br><span class="line">    <span class="attr">Environment:</span>  <span class="string">&lt;none&gt;</span>                                                                                           </span><br><span class="line">    <span class="attr">Mounts:</span>       <span class="string">&lt;none&gt;</span>                                                                                           </span><br><span class="line">  <span class="attr">Volumes:</span>        <span class="string">&lt;none&gt;</span>                                                                                           </span><br><span class="line"><span class="attr">Conditions:</span>                                                                                                        </span><br><span class="line">  <span class="string">Type</span>           <span class="string">Status</span>  <span class="string">Reason</span>                                                                                    </span><br><span class="line">  <span class="string">----</span>           <span class="string">------</span>  <span class="string">------</span>                                                                                    </span><br><span class="line">  <span class="string">Available</span>      <span class="literal">True</span>    <span class="string">MinimumReplicasAvailable</span>                                                                  </span><br><span class="line">  <span class="string">Progressing</span>    <span class="literal">True</span>    <span class="string">NewReplicaSetAvailable</span>                                                                    </span><br><span class="line"><span class="attr">OldReplicaSets:</span>  <span class="string">&lt;none&gt;</span>                                                                                            </span><br><span class="line"><span class="attr">NewReplicaSet:</span>   <span class="string">first-deploy-whoami-68dd7db55</span> <span class="string">(1/1</span> <span class="string">replicas</span> <span class="string">created)</span>                                              </span><br><span class="line"><span class="attr">Events:</span>                                                                                                            </span><br><span class="line">  <span class="string">Type</span>    <span class="string">Reason</span>             <span class="string">Age</span>   <span class="string">From</span>                   <span class="string">Message</span>                                                  </span><br><span class="line">  <span class="string">----</span>    <span class="string">------</span>             <span class="string">----</span>  <span class="string">----</span>                   <span class="string">-------</span>                                                  </span><br><span class="line">  <span class="string">Normal</span>  <span class="string">ScalingReplicaSet</span>  <span class="string">10m</span>   <span class="string">deployment-controller</span>  <span class="string">Scaled</span> <span class="string">up</span> <span class="string">replica</span> <span class="string">set</span> <span class="string">first-deploy-whoami-68dd7db55</span> <span class="string">to</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到其中有如下两行：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Pod Template:                                                                                                      </span><br><span class="line">  Labels:  <span class="built_in">run</span>=<span class="keyword">first</span>-deploy-whoami</span><br></pre></td></tr></table></figure>
+
+<p>我们尝试用这个 Labels 获取 Pods：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  clark kubectl get pods -l run=first-deploy-whoami</span><br><span class="line">NAME                                  READY   STATUS    RESTARTS   AGE</span><br><span class="line">first-deploy-whoami-68dd7db55-qtfdq   1/1     Running   0          12m</span><br></pre></td></tr></table></figure>
+
+<p>同样用这个 Labels 获取 Services：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  clark kubectl get services -l run=first-deploy-whoami</span><br><span class="line">NAME                        TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE</span><br><span class="line">first-deploy-whoami-svc-1   LoadBalancer   10.103.234.1   &lt;pending&gt;     8080:30095/TCP   19h</span><br><span class="line">first-deploy-whoami-svc-2   NodePort       10.102.32.78   &lt;none&gt;        80:31502/TCP     19h</span><br><span class="line">first-deploy-whoami-svc-3   ClusterIP      10.101.43.23   &lt;none&gt;        8080/TCP         19h</span><br></pre></td></tr></table></figure>
+
+<p>我们把pod放到 <code>POD_NAME</code> 变量中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POD_NAME=$(kubectl get pods -o go-template --template <span class="string">'&#123;&#123;range .items&#125;&#125;&#123;&#123;.metadata.name&#125;&#125;&#123;&#123;"\n"&#125;&#125;&#123;&#123;end&#125;&#125;'</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="variable">$POD_NAME</span></span><br></pre></td></tr></table></figure>
+
+<p>我们可以先看下这个Pod的Labels：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod <span class="variable">$POD_NAME</span></span><br></pre></td></tr></table></figure>
+
+<p>其中有如下输出：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Labels:             <span class="attribute">pod-template-hash</span>=68dd7db55</span><br><span class="line">                    <span class="attribute">run</span>=first-deploy-whoami</span><br></pre></td></tr></table></figure>
+
+<p>现在我们给这个Pod增加一个应用版本号 <code>app_version</code> :</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl label pod <span class="variable">$POD_NAME</span> app_version=v1</span><br></pre></td></tr></table></figure>
+
+<p>再来看一下Pod的Labels，会看到如下输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">➜  clark kubectl describe pod <span class="variable">$POD_NAME</span></span><br><span class="line">...</span><br><span class="line">Labels:             app_version=v1</span><br><span class="line">                    pod-template-hash=68dd7db55</span><br><span class="line">                    run=first-deploy-whoami</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>我们可以用新的Labels来获取Pods:</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  clark kubectl <span class="keyword">get</span> pods -l app_version=v1</span><br><span class="line">NAME                                  READY   STATUS    RESTARTS   AGE</span><br><span class="line">first-deploy-whoami<span class="number">-68</span>dd7db55-qtfdq   <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">37</span>m</span><br></pre></td></tr></table></figure>
+
+<p><a name="kJiXX"></a></p>
+<h3 id="删除-Service"><a href="#删除-Service" class="headerlink" title="删除 Service"></a>删除 Service</h3><p>我们之前创建了几个Service，我们当然可以沿用笨方法去删除，但有了Labels后，我们就可以这样做：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete service -l run=first-deploy-whoami</span><br></pre></td></tr></table></figure>
+
+<p>在我们的例子中，你会看到如下输出：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">service <span class="string">"first-deploy-whoami-svc-1"</span> deleted</span><br><span class="line">service <span class="string">"first-deploy-whoami-svc-2"</span> deleted</span><br><span class="line">service <span class="string">"first-deploy-whoami-svc-3"</span> deleted</span><br></pre></td></tr></table></figure>
+
+<p>通过下面的命令应该发现Service不见了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get services</span><br></pre></td></tr></table></figure>
+
+<p>删除Service之后，讲道理，我们之前的访问方式应该是不可用了，我们可以使用之前的命令校验下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://192.168.99.101:30095/</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube.exe service list</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl run <span class="built_in">test</span>-service-pod -it --rm --restart=Never --image=busybox --port=80 --generator=run-pod/v1 -- wget -q -O - http://first-deploy-whoami-svc-1:8080</span><br></pre></td></tr></table></figure>
+
+<p>但是，Pod中访问自己，应该还是一样：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  clark kubectl <span class="built_in">exec</span> -it <span class="variable">$POD_NAME</span> -- wget -q -O - http://localhost</span><br><span class="line">Hostname: first-deploy-whoami-68dd7db55-qtfdq</span><br><span class="line">IP: 127.0.0.1</span><br><span class="line">IP: 172.17.0.7</span><br><span class="line">GET / HTTP/1.1</span><br><span class="line">Host: localhost</span><br><span class="line">User-Agent: Wget</span><br><span class="line">Connection: close</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+
+    
+      
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>谢谢鼓励</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150407-wechatpay-khan.png" alt="Khan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="https://blog.pic.ikhan.top/20181211150331-Alipay-khan.png" alt="Khan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Khan</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-4.html" title="K8S互动教程4-使用服务发布您的应用程序">https://www.ikhan.top/posts/qrqc-basic-k8s-interactive-tutorial-4.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+            <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          
+            <a href="/tags/浅入浅出k8s实战/" rel="tag"># 浅入浅出k8s实战</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/k8s-concepts-pod-lifecyle.html" rel="next" title="Kubernetes Pod 的生命周期">
+                <i class="fa fa-chevron-left"></i> Kubernetes Pod 的生命周期
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/pod-can-not-traffic-to-isself-via-service.html" rel="prev" title="Pods 无法通过 Service 访问自己">
+                Pods 无法通过 Service 访问自己 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  
+    <img class="site-author-image" itemprop="image" src="https://blog.pic.ikhan.top/20181211093420-global-avatar.png" alt="Khan">
+  
+  <p class="site-author-name" itemprop="name">Khan</p>
+  <div class="site-description motion-element" itemprop="description">just do IT</div>
+</div>
+
+
+  <nav class="site-state motion-element">
+    
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+
+
+
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+
+
+
+
+
+  <div class="links-of-author motion-element">
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="/git@github.com:clarkhan" title="GitHub &rarr; git@github.com:clarkhan"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:clarkhan@163.com" title="E-Mail &rarr; mailto:clarkhan@163.com" rel="external nofollow noopener noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+  <div class="cc-license motion-element" itemprop="license">
+  
+  
+    
+  
+  
+  
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="external nofollow noopener noreferrer" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+
+
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#课程说明"><span class="nav-number">1.</span> <span class="nav-text">课程说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#目标"><span class="nav-number">1.1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#操作内容"><span class="nav-number">1.2.</span> <span class="nav-text">操作内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes-Service-概述"><span class="nav-number">1.3.</span> <span class="nav-text">Kubernetes Service 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务和标签"><span class="nav-number">1.4.</span> <span class="nav-text">服务和标签</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#互动教程"><span class="nav-number">2.</span> <span class="nav-text">互动教程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建新的服务"><span class="nav-number">2.1.</span> <span class="nav-text">创建新的服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-Labels"><span class="nav-number">2.2.</span> <span class="nav-text">使用 Labels</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除-Service"><span class="nav-number">2.3.</span> <span class="nav-text">删除 Service</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">  <a href="http://www.beian.miit.gov.cn" rel="external nofollow noopener noreferrer" target="_blank">苏ICP备18070412号 </a>&copy; 2015 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Khan</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">109k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">1:39</span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+
+  
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.2.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.2.0"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+<script src="//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'kkqquVhYL2YnDXXyE2hyEDxl-gzGzoHsz',
+    appKey: 'SUyVEH4lL1HnSmYQUKeWjprm',
+    placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>
